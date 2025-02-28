@@ -1,7 +1,11 @@
 package main
 
-import "github.com/Basu008/EasySplit.git/server/config"
+import (
+	"github.com/Basu008/EasySplit.git/server/config"
+	postgresStorage "github.com/Basu008/EasySplit.git/server/storage/postgres"
+)
 
 func main() {
-	config.GetConfigFromFile()
+	c := config.GetConfigFromFile()
+	postgresStorage.NewPostgresStorage(&c.DatabaseConfig)
 }
