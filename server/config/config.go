@@ -44,7 +44,7 @@ type APIConfig struct {
 type APPConfig struct {
 }
 
-func GetConfigFromFile() *Config {
+func GetConfig() *Config {
 	fileName := "default"
 	viper.SetConfigName(fileName)
 	viper.SetConfigType("toml")

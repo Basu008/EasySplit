@@ -10,7 +10,7 @@ import (
 
 type TokenAuth interface {
 	SignToken() (string, error)
-	VerifyToken(string) error
+	VerifyToken(string) (*UserClaim, error)
 }
 
 type TokenAuthentication struct {

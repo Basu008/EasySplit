@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/Basu008/EasySplit.git/app"
 	"github.com/Basu008/EasySplit.git/server/auth"
 	"github.com/Basu008/EasySplit.git/server/config"
 	"github.com/Basu008/EasySplit.git/server/validator"
@@ -14,7 +15,7 @@ type API struct {
 	TokenAuth  auth.TokenAuth
 	Validator  *validator.Validator
 
-	// App *app.App
+	App *app.App
 }
 
 type Options struct {
