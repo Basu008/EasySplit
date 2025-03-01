@@ -12,6 +12,8 @@ type Config struct {
 	ServerConfig    ServerConfig    `mapstructure:"server"`
 	DatabaseConfig  DatabaseConfig  `mapstructure:"database"`
 	TokenAuthConfig TokenAuthConfig `mapstructure:"token"`
+	APIConfig       APIConfig       `mapstructure:"api"`
+	APPConfig       APPConfig       `mapstructure:"app"`
 }
 
 type ServerConfig struct {
@@ -27,13 +29,19 @@ type DatabaseConfig struct {
 	Name     string `mapstructure:"name"`
 }
 
+func (d *DatabaseConfig) ConnectionURL() string {
+	return fmt.Sprintf("host=%s user=%s dbname=%s password=%s sslmode=%s", d.Host, d.Username, d.Name, d.Password, d.SSLMode)
+}
+
 type TokenAuthConfig struct {
 	JWTSignKey   string `mapstructure:"jwtSignKey"`
 	JWTExpiresAt int64  `mapstructure:"expiresAt"`
 }
 
-func (d *DatabaseConfig) ConnectionURL() string {
-	return fmt.Sprintf("host=%s user=%s dbname=%s password=%s sslmode=%s", d.Host, d.Username, d.Name, d.Password, d.SSLMode)
+type APIConfig struct {
+}
+
+type APPConfig struct {
 }
 
 func GetConfigFromFile() *Config {
