@@ -1,7 +1,10 @@
 package server
 
 import (
+	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/Basu008/EasySplit.git/api"
 	"github.com/Basu008/EasySplit.git/app"
@@ -10,6 +13,7 @@ import (
 	postgresStorage "github.com/Basu008/EasySplit.git/server/storage/postgres"
 	"github.com/Basu008/EasySplit.git/server/validator"
 	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
 )
 
 type Server struct {
@@ -43,4 +47,31 @@ func NewServer() *Server {
 	})
 	app.InitService(server.API.App)
 	return server
+}
+
+func (s *Server) StartServer() {
+	n := negroni.New()
+	recovery := negroni.NewRecovery()
+	n.Use(recovery)
+	n.UseHandler(s.Router)
+	s.httpServer = &http.Server{
+		Handler:      n,
+		Addr:         fmt.Sprintf("%s:%s", s.Config.ServerConfig.ListenAddr, s.Config.ServerConfig.Port),
+		ReadTimeout:  s.Config.ServerConfig.ReadTimeout * time.Second,
+		WriteTimeout: s.Config.ServerConfig.WriteTimeout * time.Second,
+	}
+	fmt.Printf("Staring server at %s:%s", s.Config.ServerConfig.ListenAddr, s.Config.ServerConfig.Port)
+	go func() {
+		err := s.httpServer.ListenAndServe()
+		if err != nil {
+			log.Fatal(err.Error())
+			return
+		}
+	}()
+}
+
+func (s *Server) StopServer() {
+	fmt.Println("Closing Postgres")
+	s.Postgres.Close()
+	fmt.Println("Closing Postgres")
 }
