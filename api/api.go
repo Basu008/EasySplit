@@ -1,9 +1,12 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/Basu008/EasySplit.git/app"
 	"github.com/Basu008/EasySplit.git/server/auth"
 	"github.com/Basu008/EasySplit.git/server/config"
+	"github.com/Basu008/EasySplit.git/server/handler"
 	"github.com/Basu008/EasySplit.git/server/validator"
 	"github.com/gorilla/mux"
 )
@@ -46,5 +49,23 @@ func NewAPI(opts *Options) *API {
 func (a *API) setupRoutes() {
 	a.Router.Root = a.MainRouter
 	a.Router.APIRoot = a.MainRouter.PathPrefix("/api").Subrouter()
-	// a.InitRoutes()
+	a.InitRoutes()
+}
+
+func (a *API) requestHandler(h func(c *handler.RequestContext, w http.ResponseWriter, r *http.Request)) http.Handler {
+	return &handler.Request{
+		HandlerFunc: h,
+		AuthFunc:    a.TokenAuth,
+		IsLoggedIn:  false,
+		IsSudoUser:  false,
+	}
+}
+
+func (a *API) requestWithAuthHandler(h func(c *handler.RequestContext, w http.ResponseWriter, r *http.Request)) http.Handler {
+	return &handler.Request{
+		HandlerFunc: h,
+		AuthFunc:    a.TokenAuth,
+		IsLoggedIn:  true,
+		IsSudoUser:  false,
+	}
 }
