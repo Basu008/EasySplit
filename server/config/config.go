@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	ServerConfig   ServerConfig   `mapstructure:"server"`
-	DatabaseConfig DatabaseConfig `mapstructure:"database"`
+	ServerConfig    ServerConfig    `mapstructure:"server"`
+	DatabaseConfig  DatabaseConfig  `mapstructure:"database"`
+	TokenAuthConfig TokenAuthConfig `mapstructure:"token"`
 }
 
 type ServerConfig struct {
@@ -24,6 +25,11 @@ type DatabaseConfig struct {
 	Password string `mapstructure:"password"`
 	SSLMode  string `mapstructure:"sslMode"`
 	Name     string `mapstructure:"name"`
+}
+
+type TokenAuthConfig struct {
+	JWTSignKey   string `mapstructure:"jwtSignKey"`
+	JWTExpiresAt int64  `mapstructure:"expiresAt"`
 }
 
 func (d *DatabaseConfig) ConnectionURL() string {

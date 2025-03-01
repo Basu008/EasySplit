@@ -1,6 +1,7 @@
 package postgresStorage
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Basu008/EasySplit.git/server/config"
@@ -23,4 +24,16 @@ func NewPostgresStorage(c *config.DatabaseConfig) *PostgresStorage {
 		return nil
 	}
 	return &PostgresStorage{Config: c, DB: db}
+}
+
+func (p *PostgresStorage) Close() {
+	if p.DB != nil {
+		db, err := p.DB.DB()
+		if err != nil {
+			log.Fatalf("failed to retrieve db")
+			return
+		}
+		db.Close()
+		fmt.Println("Database connection closed.")
+	}
 }
