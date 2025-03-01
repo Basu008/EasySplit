@@ -23,6 +23,7 @@ func NewPostgresStorage(c *config.DatabaseConfig) *PostgresStorage {
 		log.Fatalf("failed to establish connection with postgres: %s", err.Error())
 		return nil
 	}
+	fmt.Print("Connected to Postgres\n")
 	return &PostgresStorage{Config: c, DB: db}
 }
 

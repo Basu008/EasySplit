@@ -23,26 +23,27 @@ func (rh *Request) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		claim, err := rh.AuthFunc.VerifyToken(authToken)
 		if err != nil {
 			requestCTX.SetErr(fmt.Errorf("%s: failed to verify token", Unauthorized), http.StatusUnauthorized)
-			goto SKIP_REQUEST
 		} else {
 			requestCTX.UserClaim = *claim
 		}
 	}
 
-SKIP_REQUEST:
 	if requestCTX.Err == nil {
 		rh.HandlerFunc(requestCTX, w, r)
-	}
-
-	if requestCTX.ResponseCode != 0 && requestCTX.ResponseType != RedirectResp {
-		w.WriteHeader(requestCTX.ResponseCode)
 	}
 	switch t := requestCTX.ResponseType; t {
 	case JSONResp:
 		w.Header().Set("Content-Type", "application/json")
+		if requestCTX.ResponseCode != 0 {
+			w.WriteHeader(requestCTX.ResponseCode)
+		}
 		json.NewEncoder(w).Encode(requestCTX.Response)
 	case ErrorResp:
 		w.Header().Set("Content-Type", "application/json")
+		if requestCTX.ResponseCode != 0 {
+			w.WriteHeader(requestCTX.ResponseCode)
+		}
 		json.NewEncoder(w).Encode(&requestCTX.Err)
 	}
+
 }
