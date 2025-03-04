@@ -1,5 +1,11 @@
 package schema
 
+type GetUserOpts struct {
+	ID          uint   `json:"id"`
+	PhoneNumber string `json:"phone_number"`
+	Username    string `json:"username"`
+}
+
 type PhoneNoLogin struct {
 	CountryCode string `json:"country_code"`
 	PhoneNumber string `json:"phone_number" validate:"len=10"`

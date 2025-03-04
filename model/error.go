@@ -7,7 +7,9 @@ type Error struct {
 }
 
 const (
-	InvalidPhoneNo = "phone number doesn't exists"
+	InvalidPhoneNo  = "phone number doesn't exists"
+	InvalidUsername = "no user found with this username"
+	InvalidEmail    = "no user found with this email"
 )
 
 func NewError(err error, message string, code int) *Error {

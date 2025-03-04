@@ -3,6 +3,7 @@ package app
 import (
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -14,10 +15,16 @@ import (
 )
 
 type User interface {
-	FindUserByPhoneNo(phoneNumber string) (model.User, *model.Error)
+	//Login
 	LoginUser(opts *schema.PhoneNoLogin) *model.Error
 	ConfirmOTP(opts *schema.ConfirmOTPOpts) (*auth.UserClaim, *model.Error)
+	//Get user
+	GetUserByID(id uint) (model.User, *model.Error)
+	GetUserByPhoneNo(phoneNumber string) (model.User, *model.Error)
+	GetUserByUsername(username string) (model.User, *model.Error)
+	//Edit User
 	UpdateUser(opts *schema.UpdateUserOpts) *model.Error
+
 	MigrateUser() error
 }
 
@@ -41,16 +48,6 @@ func InitUser(opts *UserImplOpts) (User, error) {
 		return nil, errors.New("unable to migrate User")
 	}
 	return &ui, nil
-}
-
-func (ui *UserImpl) FindUserByPhoneNo(phoneNumber string) (model.User, *model.Error) {
-	var user model.User
-	err := ui.DB.Where("phone_number = ? ", phoneNumber).First(&user).Error
-	if err == gorm.ErrRecordNotFound {
-		errBody := model.NewError(err, model.InvalidPhoneNo, http.StatusBadRequest)
-		return user, errBody
-	}
-	return user, nil
 }
 
 func (ui *UserImpl) LoginUser(opts *schema.PhoneNoLogin) *model.Error {
@@ -81,7 +78,7 @@ func (ui *UserImpl) LoginUser(opts *schema.PhoneNoLogin) *model.Error {
 }
 
 func (ui *UserImpl) ConfirmOTP(opts *schema.ConfirmOTPOpts) (*auth.UserClaim, *model.Error) {
-	user, customErr := ui.FindUserByPhoneNo(opts.PhoneNumber)
+	user, customErr := ui.GetUserByPhoneNo(opts.PhoneNumber)
 	if customErr != nil {
 		return nil, customErr
 	}
@@ -105,6 +102,44 @@ func (ui *UserImpl) ConfirmOTP(opts *schema.ConfirmOTPOpts) (*auth.UserClaim, *m
 		PhoneNumber: user.PhoneNumber,
 	}
 	return &claim, nil
+}
+
+func (ui *UserImpl) GetUserByID(id uint) (model.User, *model.Error) {
+	var user model.User
+	err := ui.DB.First(&user, id).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			errBody := model.NewError(err, model.InvalidPhoneNo, http.StatusBadRequest)
+			return user, errBody
+		}
+		return user, model.NewError(err, "", http.StatusInternalServerError)
+	}
+	return user, nil
+}
+
+func (ui *UserImpl) GetUserByPhoneNo(phoneNumber string) (model.User, *model.Error) {
+	var user model.User
+	whereQuery := fmt.Sprintf("%s = ?", model.PhoneNumber)
+	err := ui.DB.Where(whereQuery, phoneNumber).First(&user).Error
+	if err == gorm.ErrRecordNotFound {
+		errBody := model.NewError(err, model.InvalidPhoneNo, http.StatusBadRequest)
+		return user, errBody
+	}
+	return user, nil
+}
+
+func (ui *UserImpl) GetUserByUsername(username string) (model.User, *model.Error) {
+	var user model.User
+	whereQuery := fmt.Sprintf("%s = ?", model.Username)
+	err := ui.DB.Where(whereQuery, username).First(&user).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			errBody := model.NewError(err, model.InvalidUsername, http.StatusBadRequest)
+			return user, errBody
+		}
+		return user, model.NewError(err, "", http.StatusInternalServerError)
+	}
+	return user, nil
 }
 
 func (ui *UserImpl) UpdateUser(opts *schema.UpdateUserOpts) *model.Error {

@@ -2,10 +2,55 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Basu008/EasySplit.git/schema"
 	"github.com/Basu008/EasySplit.git/server/handler"
 )
+
+func (a *API) getUser(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
+	userService := a.App.User
+	idString := r.URL.Query().Get("id")
+	var id uint64
+	if idString != "" {
+		var err error
+		id, err = strconv.ParseUint(idString, 10, 32)
+		if err != nil {
+			requestCTX.SetErr(nil, "invalid id", http.StatusBadRequest)
+			return
+		}
+	}
+	if id != 0 {
+		user, err := userService.GetUserByID(uint(id))
+		if err != nil {
+			requestCTX.SetErr(err.Err, err.Message, err.Code)
+			return
+		}
+		requestCTX.SetAppResponse(user, http.StatusOK)
+		return
+	}
+	username := r.URL.Query().Get("username")
+	if username != "" {
+		user, err := userService.GetUserByUsername(username)
+		if err != nil {
+			requestCTX.SetErr(err.Err, err.Message, err.Code)
+			return
+		}
+		requestCTX.SetAppResponse(user, http.StatusOK)
+		return
+	}
+	phoneNumber := r.URL.Query().Get("phone_number")
+	if phoneNumber != "" {
+		user, err := userService.GetUserByPhoneNo(phoneNumber)
+		if err != nil {
+			requestCTX.SetErr(err.Err, err.Message, err.Code)
+			return
+		}
+		requestCTX.SetAppResponse(user, http.StatusOK)
+		return
+	}
+	requestCTX.SetAppResponse(nil, http.StatusOK)
+}
 
 func (a *API) loginUser(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
 	var s schema.PhoneNoLogin
