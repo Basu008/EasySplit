@@ -15,7 +15,7 @@ type API struct {
 	Router     *Router
 	MainRouter *mux.Router
 	Config     *config.APIConfig
-	TokenAuth  auth.TokenAuth
+	TokenAuth  auth.TokenAuthentication
 	Validator  *validator.Validator
 
 	App *app.App
@@ -24,7 +24,7 @@ type API struct {
 type Options struct {
 	MainRouter *mux.Router
 	Config     *config.APIConfig
-	TokenAuth  auth.TokenAuth
+	TokenAuth  auth.TokenAuthentication
 	Validator  *validator.Validator
 }
 

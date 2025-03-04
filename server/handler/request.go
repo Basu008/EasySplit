@@ -10,7 +10,7 @@ import (
 
 type Request struct {
 	HandlerFunc func(*RequestContext, http.ResponseWriter, *http.Request)
-	AuthFunc    auth.TokenAuth
+	AuthFunc    auth.TokenAuthentication
 	IsLoggedIn  bool
 	IsSudoUser  bool
 }

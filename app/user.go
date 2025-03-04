@@ -8,6 +8,7 @@ import (
 
 	"github.com/Basu008/EasySplit.git/model"
 	"github.com/Basu008/EasySplit.git/schema"
+	"github.com/Basu008/EasySplit.git/server/auth"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -15,6 +16,7 @@ import (
 type User interface {
 	FindUserByPhoneNo(phoneNumber string) (model.User, *model.Error)
 	LoginUser(opts *schema.PhoneNoLogin) *model.Error
+	ConfirmOTP(opts *schema.ConfirmOTPRequest) (*auth.UserClaim, *model.Error)
 	MigrateUser() error
 }
 
@@ -75,6 +77,33 @@ func (ui *UserImpl) LoginUser(opts *schema.PhoneNoLogin) *model.Error {
 		return model.NewError(err, "", http.StatusInternalServerError)
 	}
 	return nil
+}
+
+func (ui *UserImpl) ConfirmOTP(opts *schema.ConfirmOTPRequest) (*auth.UserClaim, *model.Error) {
+	user, customErr := ui.FindUserByPhoneNo(opts.PhoneNumber)
+	if customErr != nil {
+		return nil, customErr
+	}
+	if user.OTP != opts.OTP {
+		newErr := model.NewError(nil, "invalid otp", http.StatusBadRequest)
+		return nil, newErr
+	}
+	updates := make(map[string]any)
+	updates[model.OTP] = "-"
+	if !user.PhoneVerified {
+		updates[model.PhoneVerified] = true
+	}
+	err := ui.DB.Model(&user).Updates(updates).Error
+	if err != nil {
+		newErr := model.NewError(err, "", http.StatusInternalServerError)
+		return nil, newErr
+	}
+	claim := auth.UserClaim{
+		ID:          user.ID,
+		Plan:        user.Plan,
+		PhoneNumber: user.PhoneNumber,
+	}
+	return &claim, nil
 }
 
 func (ui *UserImpl) MigrateUser() error {

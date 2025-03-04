@@ -1,6 +1,9 @@
 package handler
 
-import "github.com/Basu008/EasySplit.git/server/auth"
+import (
+	"github.com/Basu008/EasySplit.git/model"
+	"github.com/Basu008/EasySplit.git/server/auth"
+)
 
 type RequestContext struct {
 	RequestID    string
@@ -20,7 +23,7 @@ func (requestCTX *RequestContext) SetErr(err error, errMsg string, statusCode in
 	if appErr == nil {
 		appErr = &AppErr{}
 	}
-	appErr.Error = append(appErr.Error, err)
+	appErr.Error = append(appErr.Error, *model.NewError(err, errMsg, statusCode))
 	requestCTX.Err = appErr
 }
 

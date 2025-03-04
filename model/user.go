@@ -4,20 +4,21 @@ import "time"
 
 // fields
 const (
-	PhoneNumber = "phone_number"
-	OTP         = "otp"
+	PhoneNumber   = "phone_number"
+	OTP           = "otp"
+	PhoneVerified = "phone_verified"
 )
 
 type User struct {
-	ID            uint      `json:"id" gorm:"primary key;autoIncrement"`
-	Username      *string   `json:"username" gorm:"unique"`
-	PhoneNumber   string    `json:"phone_number" gorm:"unique;not null"`
-	CountryCode   string    `json:"country_code"`
-	OTP           string    `json:"otp"`
-	Email         string    `json:"email"`
-	Plan          string    `json:"plan" gorm:"default:FREE"`
-	PhoneVerified bool      `json:"phone_verified"  gorm:"default:false"`
-	EmailVerified bool      `json:"email_verified"  gorm:"default:false"`
+	ID            uint      `json:"id,omitempty" gorm:"primary key;autoIncrement"`
+	Username      *string   `json:"username,omitempty" gorm:"unique"`
+	PhoneNumber   string    `json:"phone_number,omitempty" gorm:"unique;not null"`
+	CountryCode   string    `json:"country_code,omitempty"`
+	OTP           string    `json:"otp,omitempty"`
+	Email         *string   `json:"email,omitempty" gorm:"unique"`
+	Plan          string    `json:"plan,omitempty" gorm:"default:FREE"`
+	PhoneVerified bool      `json:"phone_verified,omitempty"  gorm:"default:false"`
+	EmailVerified bool      `json:"email_verified,omitempty"  gorm:"default:false"`
 	CreatedAt     time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt     time.Time `json:"updated_at" gorm:"autoUpdateime"`
 }

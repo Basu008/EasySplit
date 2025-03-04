@@ -8,10 +8,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type TokenAuth interface {
-	SignToken() (string, error)
-	VerifyToken(string) (*UserClaim, error)
-}
+// type TokenAuth interface {
+// 	SignToken() (string, error)
+// 	VerifyToken(string) (*UserClaim, error)
+// }
 
 type TokenAuthentication struct {
 	Config    *config.TokenAuthConfig
@@ -44,13 +44,13 @@ func (t *TokenAuthentication) VerifyToken(tokenString string) (*UserClaim, error
 	return &claim, err
 }
 
-func NewTokenAuthentication(c *config.TokenAuthConfig) *TokenAuthentication {
-	return &TokenAuthentication{Config: c}
+func NewTokenAuthentication(c *config.TokenAuthConfig) TokenAuthentication {
+	return TokenAuthentication{Config: c}
 }
 
 type UserClaim struct {
 	ID          uint   `json:"id"`
-	Type        string `json:"type"`
+	Plan        string `json:"plan"`
 	PhoneNumber string `json:"phone_no"`
 	jwt.RegisteredClaims
 }

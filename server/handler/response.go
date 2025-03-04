@@ -1,6 +1,10 @@
 package handler
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/Basu008/EasySplit.git/model"
+)
 
 type ResponseType string
 
@@ -13,8 +17,7 @@ const (
 )
 
 type AppErr struct {
-	Error     []error
-	RequestID *string
+	Error []model.Error
 }
 
 type Response interface {
@@ -38,6 +41,24 @@ func (r *AppResponse) MarshalJSON() ([]byte, error) {
 
 func (r *AppResponse) GetRaw() interface{} {
 	return r.Payload
+}
+
+func (err *AppErr) MarshalJSON() ([]byte, error) {
+	errs := []string{}
+	for _, e := range err.Error {
+		if e.Message != "" {
+			errs = append(errs, e.Message)
+		} else {
+			errs = append(errs, e.Err.Error())
+		}
+	}
+	return json.Marshal(&struct {
+		Error   []string `json:"errors"`
+		Success bool     `json:"success"`
+	}{
+		Error:   errs,
+		Success: false,
+	})
 }
 
 var (
