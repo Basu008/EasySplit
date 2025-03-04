@@ -46,6 +46,8 @@ type APIConfig struct {
 }
 
 type APPConfig struct {
+	OTPLength int    `mapstructure:"otpLength"`
+	OTPChars  string `mapstructure:"otpChars"`
 }
 
 func GetConfig() *Config {

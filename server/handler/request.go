@@ -22,7 +22,7 @@ func (rh *Request) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if authToken != "" {
 		claim, err := rh.AuthFunc.VerifyToken(authToken)
 		if err != nil {
-			requestCTX.SetErr(fmt.Errorf("%s: failed to verify token", Unauthorized), http.StatusUnauthorized)
+			requestCTX.SetErr(fmt.Errorf("%s: failed to verify token", Unauthorized), "", http.StatusUnauthorized)
 		} else {
 			requestCTX.UserClaim = *claim
 		}
@@ -43,7 +43,11 @@ func (rh *Request) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if requestCTX.ResponseCode != 0 {
 			w.WriteHeader(requestCTX.ResponseCode)
 		}
-		json.NewEncoder(w).Encode(&requestCTX.Err)
+		if requestCTX.ErrMsg != "" {
+			json.NewEncoder(w).Encode(&requestCTX.ErrMsg)
+		} else {
+			json.NewEncoder(w).Encode(&requestCTX.Err)
+		}
 	}
 
 }

@@ -7,12 +7,13 @@ type RequestContext struct {
 	Path         string
 	Response     Response
 	Err          *AppErr
+	ErrMsg       string
 	ResponseType ResponseType
 	ResponseCode int
 	UserClaim    auth.UserClaim
 }
 
-func (requestCTX *RequestContext) SetErr(err error, statusCode int) {
+func (requestCTX *RequestContext) SetErr(err error, errMsg string, statusCode int) {
 	appErr := requestCTX.Err
 	requestCTX.ResponseType = ErrorResp
 	requestCTX.ResponseCode = statusCode
@@ -34,6 +35,6 @@ func (requestCTX *RequestContext) SetAppResponse(message interface{}, statusCode
 
 func (requestCTX *RequestContext) SetErrs(errs []error, statusCode int) {
 	for _, e := range errs {
-		requestCTX.SetErr(e, statusCode)
+		requestCTX.SetErr(e, e.Error(), statusCode)
 	}
 }

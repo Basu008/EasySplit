@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/Basu008/EasySplit.git/server/handler"
@@ -8,4 +10,19 @@ import (
 
 func (a *API) healthCheck(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
 	requestCTX.SetAppResponse(true, http.StatusOK)
+}
+
+func (a *API) DecodeJSONBody(r *http.Request, res interface{}) error {
+	if r.Header.Get("Content-Type") != "" {
+		if r.Header.Get("Content-Type") != "application/json" {
+			err := errors.New("unsupported content-type request: Content-Type header is not application/json")
+			return err
+		}
+	}
+	if r.ContentLength == 0 {
+		return errors.New("request body must not be empty")
+	}
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	return dec.Decode(&res)
 }

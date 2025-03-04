@@ -16,6 +16,9 @@ type App struct {
 	Postgres   *postgresStorage.PostgresStorage
 	Config     *config.APPConfig
 	HttpClient http.Client
+
+	//Sevices
+	User User
 }
 
 func NewApp(opts *Options) *App {
