@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Basu008/EasySplit.git/server/auth"
 )
@@ -18,16 +19,20 @@ type Request struct {
 func (rh *Request) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestCTX := &RequestContext{}
 	requestCTX.Path = r.URL.Path
-	authToken := r.Header.Get("Authorization")
-	if authToken != "" {
-		claim, err := rh.AuthFunc.VerifyToken(authToken)
-		if err != nil {
-			requestCTX.SetErr(fmt.Errorf("%s: failed to verify token", Unauthorized), "", http.StatusUnauthorized)
+	auth := r.Header.Get("Authorization")
+	if auth != "" {
+		d := strings.Split(auth, "Bearer ")
+		if len(d) < 2 {
+			requestCTX.SetErr(nil, fmt.Sprintf("%s: authorization is of type bearer", BadRequest), http.StatusUnauthorized)
 		} else {
-			requestCTX.UserClaim = *claim
+			claim, err := rh.AuthFunc.VerifyToken(d[1])
+			if err != nil {
+				requestCTX.SetErr(fmt.Errorf("%s: failed to verify token", Unauthorized), "", http.StatusUnauthorized)
+			} else {
+				requestCTX.UserClaim = *claim
+			}
 		}
 	}
-
 	if requestCTX.Err == nil {
 		rh.HandlerFunc(requestCTX, w, r)
 	}

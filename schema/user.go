@@ -5,7 +5,13 @@ type PhoneNoLogin struct {
 	PhoneNumber string `json:"phone_number" validate:"len=10"`
 }
 
-type ConfirmOTPRequest struct {
+type ConfirmOTPOpts struct {
 	PhoneNumber string `json:"phone_number" validate:"len=10"`
 	OTP         string `json:"otp" validate:"len=4"`
+}
+
+type UpdateUserOpts struct {
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }

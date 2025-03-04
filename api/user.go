@@ -25,7 +25,7 @@ func (a *API) loginUser(requestCTX *handler.RequestContext, w http.ResponseWrite
 }
 
 func (a *API) confirmOTP(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
-	var s schema.ConfirmOTPRequest
+	var s schema.ConfirmOTPOpts
 	if err := a.DecodeJSONBody(r, &s); err != nil {
 		requestCTX.SetErr(err, "", http.StatusBadRequest)
 		return
@@ -45,4 +45,22 @@ func (a *API) confirmOTP(requestCTX *handler.RequestContext, w http.ResponseWrit
 		}
 		requestCTX.SetAppResponse(token, http.StatusOK)
 	}
+}
+
+func (a *API) updateUser(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
+	var s schema.UpdateUserOpts
+	if err := a.DecodeJSONBody(r, &s); err != nil {
+		requestCTX.SetErr(err, "", http.StatusBadRequest)
+		return
+	}
+	if s.Username != "" && !a.IsUsernameValid(s.Username) {
+		requestCTX.SetErr(nil, "weak username", http.StatusInternalServerError)
+		return
+	}
+	s.ID = requestCTX.UserClaim.ID
+	if custErr := a.App.User.UpdateUser(&s); custErr != nil {
+		requestCTX.SetErr(custErr.Err, custErr.Message, custErr.Code)
+		return
+	}
+	requestCTX.SetAppResponse(true, http.StatusAccepted)
 }

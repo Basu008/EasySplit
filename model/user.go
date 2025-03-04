@@ -4,6 +4,8 @@ import "time"
 
 // fields
 const (
+	Username      = "username"
+	Email         = "email"
 	PhoneNumber   = "phone_number"
 	OTP           = "otp"
 	PhoneVerified = "phone_verified"

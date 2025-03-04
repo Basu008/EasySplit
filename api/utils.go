@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"regexp"
 
 	"github.com/Basu008/EasySplit.git/server/handler"
 )
@@ -25,4 +26,13 @@ func (a *API) DecodeJSONBody(r *http.Request, res interface{}) error {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	return dec.Decode(&res)
+}
+
+func (a *API) IsUsernameValid(username string) bool {
+	regex := `^[a-zA-Z0-9@._]{5,30}$`
+	matched, err := regexp.MatchString(regex, username)
+	if err != nil {
+		return false
+	}
+	return matched
 }

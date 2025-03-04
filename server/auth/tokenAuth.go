@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/base64"
-	"os"
 
 	"github.com/Basu008/EasySplit.git/server/config"
 	"github.com/golang-jwt/jwt/v5"
@@ -31,8 +30,9 @@ func (t *TokenAuthentication) VerifyToken(tokenString string) (*UserClaim, error
 		return nil, err
 	}
 	var claim UserClaim
+	secretKey := []byte(t.Config.JWTSignKey)
 	token, err := jwt.ParseWithClaims(string(decodedString), &claim, func(t *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+		return []byte(secretKey), nil
 	})
 
 	if err != nil {

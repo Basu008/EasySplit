@@ -16,7 +16,8 @@ import (
 type User interface {
 	FindUserByPhoneNo(phoneNumber string) (model.User, *model.Error)
 	LoginUser(opts *schema.PhoneNoLogin) *model.Error
-	ConfirmOTP(opts *schema.ConfirmOTPRequest) (*auth.UserClaim, *model.Error)
+	ConfirmOTP(opts *schema.ConfirmOTPOpts) (*auth.UserClaim, *model.Error)
+	UpdateUser(opts *schema.UpdateUserOpts) *model.Error
 	MigrateUser() error
 }
 
@@ -79,7 +80,7 @@ func (ui *UserImpl) LoginUser(opts *schema.PhoneNoLogin) *model.Error {
 	return nil
 }
 
-func (ui *UserImpl) ConfirmOTP(opts *schema.ConfirmOTPRequest) (*auth.UserClaim, *model.Error) {
+func (ui *UserImpl) ConfirmOTP(opts *schema.ConfirmOTPOpts) (*auth.UserClaim, *model.Error) {
 	user, customErr := ui.FindUserByPhoneNo(opts.PhoneNumber)
 	if customErr != nil {
 		return nil, customErr
@@ -104,6 +105,32 @@ func (ui *UserImpl) ConfirmOTP(opts *schema.ConfirmOTPRequest) (*auth.UserClaim,
 		PhoneNumber: user.PhoneNumber,
 	}
 	return &claim, nil
+}
+
+func (ui *UserImpl) UpdateUser(opts *schema.UpdateUserOpts) *model.Error {
+	user := model.User{
+		ID: opts.ID,
+	}
+	updates := make(map[string]any)
+	if opts.Username != "" {
+		updates[model.Username] = opts.Username
+	}
+	if opts.Email != "" {
+		updates[model.Email] = opts.Email
+	}
+	err := ui.DB.Model(&user).Updates(
+		updates,
+	).Error
+	if err != nil {
+		if err == gorm.ErrDuplicatedKey {
+			return model.NewError(nil, "duplicate email/username not allowed", http.StatusBadRequest)
+		}
+		if err == gorm.ErrRecordNotFound {
+			return model.NewError(nil, "user doesn't exists", http.StatusBadRequest)
+		}
+		return model.NewError(err, "", http.StatusInternalServerError)
+	}
+	return nil
 }
 
 func (ui *UserImpl) MigrateUser() error {
