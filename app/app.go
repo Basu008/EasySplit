@@ -18,7 +18,8 @@ type App struct {
 	HttpClient http.Client
 
 	//Sevices
-	User User
+	User   User
+	Friend Friend
 }
 
 func NewApp(opts *Options) *App {

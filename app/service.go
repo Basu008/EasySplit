@@ -12,4 +12,12 @@ func InitService(a *App) {
 		os.Exit(1)
 		return
 	}
+	a.Friend, err = InitFriend(&FriendImplOpts{
+		App: a,
+		DB:  a.Postgres.DB,
+	})
+	if err != nil {
+		os.Exit(1)
+		return
+	}
 }
