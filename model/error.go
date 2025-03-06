@@ -20,6 +20,7 @@ const (
 
 const (
 	SelfFriendRequest = "you can't send request to yourself"
+	NoFriends         = "no friends found"
 )
 
 func NewError(err error, message string, code int) *Error {

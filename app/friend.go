@@ -14,6 +14,8 @@ import (
 type Friend interface {
 	SendFriendRequest(opts *schema.FriendRequestOpts) *model.Error
 	UpdateFriendRequest(opts *schema.FriendRequestOpts) *model.Error
+	GetAllFriends(userID uint, page int) ([]model.Friend, *model.Error)
+	GetFriendStatus(userID, friendUserID uint) (*model.Friend, *model.Error)
 	MigrateFriend() error
 }
 
@@ -86,6 +88,35 @@ func (fi *FriendImpl) UpdateFriendRequest(opts *schema.FriendRequestOpts) *model
 		}
 	}
 	return nil
+}
+
+func (fi *FriendImpl) GetAllFriends(userID uint, page int) ([]model.Friend, *model.Error) {
+	friends := []model.Friend{}
+
+	whereQuery := fmt.Sprintf("%s = ? AND %s = ?", model.SenderUserID, model.RequestStatus)
+
+	err := fi.DB.Select(model.ReceiverUserID).Where(whereQuery, userID, model.Accepted).Find(&friends).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, model.NewError(err, model.NoFriends, http.StatusBadRequest)
+		}
+		return nil, model.NewError(err, "", http.StatusInternalServerError)
+	}
+	return friends, nil
+}
+
+func (fi *FriendImpl) GetFriendStatus(userID, friendUserID uint) (*model.Friend, *model.Error) {
+	friend := model.Friend{}
+	friend.SenderUserID = userID
+	friend.ReceiverUserID = friendUserID
+	err := fi.DB.First(&friend).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, model.NewError(err, model.RequestDoesntExist, http.StatusBadRequest)
+		}
+		return nil, model.NewError(err, "", http.StatusInternalServerError)
+	}
+	return &friend, nil
 }
 
 func (fi *FriendImpl) MigrateFriend() error {

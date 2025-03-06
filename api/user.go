@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/Basu008/EasySplit.git/schema"
 	"github.com/Basu008/EasySplit.git/server/handler"
@@ -10,16 +9,7 @@ import (
 
 func (a *API) getUser(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
 	userService := a.App.User
-	idString := r.URL.Query().Get("id")
-	var id uint64
-	if idString != "" {
-		var err error
-		id, err = strconv.ParseUint(idString, 10, 32)
-		if err != nil {
-			requestCTX.SetErr(nil, "invalid id", http.StatusBadRequest)
-			return
-		}
-	}
+	id := a.getUserIDfromPath(r)
 	if id != 0 {
 		user, err := userService.GetUserByID(uint(id))
 		if err != nil {

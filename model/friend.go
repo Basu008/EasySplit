@@ -24,6 +24,6 @@ type Friend struct {
 	UpdatedAt      time.Time `json:"updated_at" gorm:"autoUpdateime"`
 
 	// foreign keys
-	SenderUser   User `gorm:"foreignKey:SenderUserID;constraint:OnDelete:CASCADE;"`
-	ReceiverUser User `gorm:"foreignKey:ReceiverUserID;constraint:OnDelete:CASCADE;"`
+	SenderUser   User `json:"-" gorm:"foreignKey:SenderUserID;constraint:OnDelete:CASCADE;"`
+	ReceiverUser User `json:"-" gorm:"foreignKey:ReceiverUserID;constraint:OnDelete:CASCADE;"`
 }

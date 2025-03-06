@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"regexp"
+	"strconv"
 
 	"github.com/Basu008/EasySplit.git/server/handler"
 )
@@ -35,4 +36,23 @@ func (a *API) IsUsernameValid(username string) bool {
 		return false
 	}
 	return matched
+}
+
+func (a *API) getPageValue(r *http.Request) int {
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	return page
+}
+
+func (a *API) getUserIDfromPath(r *http.Request) uint {
+	idString := r.URL.Query().Get("id")
+	var id uint64
+	if idString != "" {
+		var err error
+		id, err = strconv.ParseUint(idString, 10, 32)
+		if err != nil {
+			return 0
+		}
+		return uint(id)
+	}
+	return uint(id)
 }
