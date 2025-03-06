@@ -41,9 +41,11 @@ func (a *API) updateFriendRequest(requestCTX *handler.RequestContext, w http.Res
 		requestCTX.SetErrs(errs, http.StatusBadRequest)
 		return
 	}
+	s.SenderUserID = requestCTX.UserClaim.ID
 	err := a.App.Friend.UpdateFriendRequest(&s)
 	if err != nil {
 		requestCTX.SetErr(err.Err, err.Message, err.Code)
+		return
 	}
 	requestCTX.SetAppResponse(true, http.StatusOK)
 }

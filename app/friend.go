@@ -42,7 +42,7 @@ func InitFriend(opts *FriendImplOpts) (Friend, error) {
 func (fi *FriendImpl) SendFriendRequest(opts *schema.FriendRequestOpts) *model.Error {
 	friendModel := &model.Friend{}
 
-	whereQuery := fmt.Sprintf("%s = ? AND %s = ?", model.SenderUserID, model.RecieverUserID)
+	whereQuery := fmt.Sprintf("%s = ? AND %s = ?", model.SenderUserID, model.ReceiverUserID)
 
 	var count int64
 	fi.DB.Model(friendModel).Where(whereQuery, opts.ReceiverUserID, opts.SenderUserID).
@@ -65,8 +65,7 @@ func (fi *FriendImpl) SendFriendRequest(opts *schema.FriendRequestOpts) *model.E
 
 func (fi *FriendImpl) UpdateFriendRequest(opts *schema.FriendRequestOpts) *model.Error {
 	friendModel := &model.Friend{}
-
-	whereQuery := fmt.Sprintf("%s = ? AND %s = ? AND %s = ?", model.SenderUserID, model.RecieverUserID, model.RequestStatus)
+	whereQuery := fmt.Sprintf("%s = ? AND %s = ? AND %s = ?", model.SenderUserID, model.ReceiverUserID, model.RequestStatus)
 	if opts.RequestStatus == model.Rejected {
 		err := fi.DB.Delete(friendModel, whereQuery, opts.SenderUserID, opts.ReceiverUserID, model.Requested).Error
 		if err != nil {
