@@ -63,7 +63,7 @@ func (a *API) allFriends(requestCTX *handler.RequestContext, w http.ResponseWrit
 
 func (a *API) getFriendStatus(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
 	userID := requestCTX.UserClaim.ID
-	friendID := a.getUserIDfromPath(r)
+	friendID := a.getUserIDfromPath(r, "friend_id")
 	friend, err := a.App.Friend.GetFriendStatus(userID, friendID)
 	if err != nil {
 		requestCTX.SetErr(err.Err, err.Message, err.Code)
