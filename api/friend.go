@@ -53,11 +53,7 @@ func (a *API) updateFriendRequest(requestCTX *handler.RequestContext, w http.Res
 func (a *API) allFriends(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
 	userID := requestCTX.UserClaim.ID
 	page := a.getPageValue(r)
-	friends, err := a.App.Friend.GetAllFriends(userID, page)
-	if err != nil {
-		requestCTX.SetErr(err.Err, err.Message, err.Code)
-		return
-	}
+	friends := a.App.Friend.GetAllFriends(userID, page)
 	requestCTX.SetAppResponse(friends, http.StatusOK)
 }
 

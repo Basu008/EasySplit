@@ -14,7 +14,7 @@ import (
 type Friend interface {
 	SendFriendRequest(opts *schema.FriendRequestOpts) *model.Error
 	UpdateFriendRequest(opts *schema.FriendRequestOpts) *model.Error
-	GetAllFriends(userID uint, page int) ([]model.Friend, *model.Error)
+	GetAllFriends(userID uint, page int) []schema.GetAllFriendsResponse
 	GetFriendStatus(userID, friendUserID uint) (*model.Friend, *model.Error)
 	MigrateFriend() error
 }
@@ -90,19 +90,17 @@ func (fi *FriendImpl) UpdateFriendRequest(opts *schema.FriendRequestOpts) *model
 	return nil
 }
 
-func (fi *FriendImpl) GetAllFriends(userID uint, page int) ([]model.Friend, *model.Error) {
-	friends := []model.Friend{}
-
-	whereQuery := fmt.Sprintf("%s = ? AND %s = ?", model.SenderUserID, model.RequestStatus)
-
-	err := fi.DB.Select(model.ReceiverUserID).Where(whereQuery, userID, model.Accepted).Find(&friends).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, model.NewError(err, model.NoFriends, http.StatusBadRequest)
-		}
-		return nil, model.NewError(err, "", http.StatusInternalServerError)
-	}
-	return friends, nil
+func (fi *FriendImpl) GetAllFriends(userID uint, page int) []schema.GetAllFriendsResponse {
+	friends := []schema.GetAllFriendsResponse{}
+	offset := page * fi.App.Config.Limit
+	fi.DB.Table("users").
+		Select("users.id, users.username, users.phone_number").
+		Joins("LEFT JOIN friends ON users.id = friends.receiver_user_id").
+		Where("friends.sender_user_id = ? AND friends.request_status = ?", userID, model.Accepted).
+		Offset(offset).
+		Limit(fi.App.Config.Limit).
+		Scan(&friends)
+	return friends
 }
 
 func (fi *FriendImpl) GetFriendStatus(userID, friendUserID uint) (*model.Friend, *model.Error) {
