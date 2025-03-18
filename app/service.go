@@ -20,4 +20,12 @@ func InitService(a *App) {
 		os.Exit(1)
 		return
 	}
+	a.Expense, err = InitExpense(&ExpenseImplOpts{
+		App: a,
+		DB:  a.Postgres.DB,
+	})
+	if err != nil {
+		os.Exit(1)
+		return
+	}
 }
