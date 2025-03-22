@@ -43,7 +43,7 @@ func (a *API) getPageValue(r *http.Request) int {
 	return page
 }
 
-func (a *API) getUserIDfromPath(r *http.Request, key string) uint {
+func (a *API) getIDfromPath(r *http.Request, key string) uint {
 	idString := r.URL.Query().Get(key)
 	var id uint64
 	if idString != "" {

@@ -28,4 +28,12 @@ func InitService(a *App) {
 		os.Exit(1)
 		return
 	}
+	a.Group, err = InitGroup(&GroupImplOpts{
+		App: a,
+		DB:  a.Postgres.DB,
+	})
+	if err != nil {
+		os.Exit(1)
+		return
+	}
 }

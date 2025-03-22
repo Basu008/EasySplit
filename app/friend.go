@@ -13,7 +13,7 @@ import (
 
 type Friend interface {
 	SendFriendRequest(opts *schema.FriendRequestOpts) *model.Error
-	UpdateFriendRequest(opts *schema.FriendRequestOpts) *model.Error
+	UpdateFriendRequest(opts *schema.UpdateFriendRequestOpts) *model.Error
 	GetAllFriends(userID uint, page int) []schema.GetAllFriendsResponse
 	GetFriendStatus(userID, friendUserID uint) (*model.Friend, *model.Error)
 	MigrateFriend() error
@@ -65,7 +65,7 @@ func (fi *FriendImpl) SendFriendRequest(opts *schema.FriendRequestOpts) *model.E
 	return nil
 }
 
-func (fi *FriendImpl) UpdateFriendRequest(opts *schema.FriendRequestOpts) *model.Error {
+func (fi *FriendImpl) UpdateFriendRequest(opts *schema.UpdateFriendRequestOpts) *model.Error {
 	friendModel := &model.Friend{}
 	whereQuery := fmt.Sprintf("%s = ? AND %s = ? AND %s = ?", model.SenderUserID, model.ReceiverUserID, model.RequestStatus)
 	if opts.RequestStatus == model.Rejected {

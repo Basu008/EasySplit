@@ -21,6 +21,7 @@ type App struct {
 	User    User
 	Friend  Friend
 	Expense Expense
+	Group   Group
 }
 
 func NewApp(opts *Options) *App {

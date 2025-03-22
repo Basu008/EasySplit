@@ -9,7 +9,7 @@ import (
 
 func (a *API) getUser(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
 	userService := a.App.User
-	id := a.getUserIDfromPath(r, "id")
+	id := a.getIDfromPath(r, "id")
 	if id != 0 {
 		user, err := userService.GetUserByID(uint(id))
 		if err != nil {

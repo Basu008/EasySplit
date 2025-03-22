@@ -32,7 +32,7 @@ func (a *API) sendFriendRequest(requestCTX *handler.RequestContext, w http.Respo
 }
 
 func (a *API) updateFriendRequest(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
-	var s schema.FriendRequestOpts
+	var s schema.UpdateFriendRequestOpts
 	if err := a.DecodeJSONBody(r, &s); err != nil {
 		requestCTX.SetErr(err, "", http.StatusBadRequest)
 		return
@@ -41,7 +41,7 @@ func (a *API) updateFriendRequest(requestCTX *handler.RequestContext, w http.Res
 		requestCTX.SetErrs(errs, http.StatusBadRequest)
 		return
 	}
-	s.SenderUserID = requestCTX.UserClaim.ID
+	s.ReceiverUserID = requestCTX.UserClaim.ID
 	err := a.App.Friend.UpdateFriendRequest(&s)
 	if err != nil {
 		requestCTX.SetErr(err.Err, err.Message, err.Code)
@@ -59,7 +59,7 @@ func (a *API) allFriends(requestCTX *handler.RequestContext, w http.ResponseWrit
 
 func (a *API) getFriendStatus(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
 	userID := requestCTX.UserClaim.ID
-	friendID := a.getUserIDfromPath(r, "friend_id")
+	friendID := a.getIDfromPath(r, "id")
 	friend, err := a.App.Friend.GetFriendStatus(userID, friendID)
 	if err != nil {
 		requestCTX.SetErr(err.Err, err.Message, err.Code)
