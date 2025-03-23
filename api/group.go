@@ -44,5 +44,24 @@ func (a *API) getGroups(requestCTX *handler.RequestContext, w http.ResponseWrite
 		return
 	}
 	requestCTX.SetAppResponse(groups, http.StatusOK)
+}
 
+func (a *API) editGroup(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
+	var s schema.EditGroupInfoOpts
+	if err := a.DecodeJSONBody(r, &s); err != nil {
+		requestCTX.SetErr(err, "", http.StatusBadRequest)
+		return
+	}
+	if errs := a.Validator.Validate(&s); errs != nil {
+		requestCTX.SetErrs(errs, http.StatusBadRequest)
+		return
+	}
+	groupID := a.getIDfromPath(r, "ID")
+	s.ID = groupID
+	errResp := a.App.Group.EditGroup(&s)
+	if errResp != nil {
+		requestCTX.SetErr(errResp.Err, "", errResp.Code)
+		return
+	}
+	requestCTX.SetAppResponse(true, http.StatusOK)
 }

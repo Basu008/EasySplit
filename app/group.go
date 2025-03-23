@@ -16,7 +16,8 @@ type Group interface {
 	//Get
 	GetGroupByID(id uint) (*schema.GroupResponse, *model.Error)
 	GetGroups(ownerID uint, page int) ([]schema.GroupResponse, *model.Error)
-
+	//Edit
+	EditGroup(opts *schema.EditGroupInfoOpts) *model.Error
 	MigrateGroup() error
 }
 
@@ -116,6 +117,27 @@ func (gi *GroupImpl) GetGroups(ownerID uint, page int) ([]schema.GroupResponse, 
 		groupResp = append(groupResp, *groupResponse(&group))
 	}
 	return groupResp, nil
+}
+
+func (gi *GroupImpl) EditGroup(opts *schema.EditGroupInfoOpts) *model.Error {
+	group := model.Group{
+		ID: opts.ID,
+	}
+	update := make(map[string]interface{})
+	if opts.Name != "" {
+		update[model.GroupName] = opts.Name
+	}
+	if opts.Type != "" {
+		update[model.GroupType] = opts.Type
+	}
+	err := gi.DB.Model(&group).Updates(update).Error
+	if err != nil {
+		return &model.Error{
+			Err:  err,
+			Code: http.StatusInternalServerError,
+		}
+	}
+	return nil
 }
 
 func groupResponse(group *model.Group) *schema.GroupResponse {

@@ -8,6 +8,7 @@ type CreateGroupOpts struct {
 }
 
 type EditGroupInfoOpts struct {
+	ID   uint
 	Name string `json:"name"`
 	Type string `json:"type"`
 }

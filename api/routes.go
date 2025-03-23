@@ -21,4 +21,5 @@ func (a *API) InitRoutes() {
 	a.Router.APIRoot.Handle("/group", a.requestWithAuthHandler(a.createGroup)).Methods("POST")
 	a.Router.APIRoot.Handle("/group/{{id}}", a.requestWithAuthHandler(a.getGroupByID)).Methods("GET")
 	a.Router.APIRoot.Handle("/groups", a.requestWithAuthHandler(a.getGroups)).Methods("GET")
+	a.Router.APIRoot.Handle("/group/{{id}}", a.requestWithAuthHandler(a.editGroup)).Methods("PATCH")
 }

@@ -2,6 +2,11 @@ package model
 
 import "time"
 
+const (
+	GroupName = "name"
+	GroupType = "type"
+)
+
 type Group struct {
 	ID            uint    `gorm:"primaryKey;autoIncrement"`
 	Name          string  `gorm:"not null"`
