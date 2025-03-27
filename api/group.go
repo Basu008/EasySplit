@@ -26,7 +26,7 @@ func (a *API) createGroup(requestCTX *handler.RequestContext, w http.ResponseWri
 }
 
 func (a *API) getGroupByID(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
-	groupID := a.getIDfromPath(r, "ID")
+	groupID := a.getIDfromPath(r, "id")
 	group, errResp := a.App.Group.GetGroupByID(groupID)
 	if errResp != nil {
 		requestCTX.SetErr(errResp.Err, errResp.Message, errResp.Code)
@@ -56,7 +56,7 @@ func (a *API) editGroup(requestCTX *handler.RequestContext, w http.ResponseWrite
 		requestCTX.SetErrs(errs, http.StatusBadRequest)
 		return
 	}
-	groupID := a.getIDfromPath(r, "ID")
+	groupID := a.getIDfromPath(r, "id")
 	s.ID = groupID
 	errResp := a.App.Group.EditGroup(&s)
 	if errResp != nil {

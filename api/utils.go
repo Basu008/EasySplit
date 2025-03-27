@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/Basu008/EasySplit.git/server/handler"
+	"github.com/gorilla/mux"
 )
 
 func (a *API) healthCheck(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
@@ -44,7 +45,7 @@ func (a *API) getPageValue(r *http.Request) int {
 }
 
 func (a *API) getIDfromPath(r *http.Request, key string) uint {
-	idString := r.URL.Query().Get(key)
+	idString := mux.Vars(r)[key]
 	var id uint64
 	if idString != "" {
 		var err error

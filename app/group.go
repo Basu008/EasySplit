@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -50,9 +51,9 @@ func InitGroup(opts *GroupImplOpts) (Group, error) {
 func (gi *GroupImpl) CreateGroup(opts *schema.CreateGroupOpts) *model.Error {
 	tx := gi.DB.Begin()
 	group := model.Group{
-		Name:    opts.Name,
-		OwnerID: opts.OwnerID,
-		Type:    opts.Type,
+		Name:      opts.Name,
+		CreatedBy: opts.OwnerID,
+		Type:      opts.Type,
 	}
 	if err := tx.Create(&group).Error; err != nil {
 		tx.Rollback()
@@ -62,10 +63,10 @@ func (gi *GroupImpl) CreateGroup(opts *schema.CreateGroupOpts) *model.Error {
 		}
 	}
 	members := []model.GroupMember{}
-	for _, memberID := range opts.MemberIDs {
+	for _, userID := range opts.UserIDs {
 		members = append(members, model.GroupMember{
-			GroupID:  group.ID,
-			MemberID: memberID,
+			GroupID: group.ID,
+			UserID:  userID,
 		})
 	}
 	if err := tx.CreateInBatches(members, len(members)).Error; err != nil {
@@ -87,22 +88,32 @@ func (gi *GroupImpl) CreateGroup(opts *schema.CreateGroupOpts) *model.Error {
 
 func (gi *GroupImpl) GetGroupByID(id uint) (*schema.GroupResponse, *model.Error) {
 	var group model.Group
-	group.ID = id
-	if err := gi.DB.Preload("Members.Member").First(&group).Error; err != nil {
+	var members []model.GroupMember
+
+	err := gi.DB.First(&group, id).Error
+	if err != nil {
 		return nil, &model.Error{
-			Err:  err,
-			Code: http.StatusInternalServerError,
+			Err:  fmt.Errorf("group not found: %w", err),
+			Code: http.StatusBadRequest,
 		}
 	}
-	return groupResponse(&group), nil
+
+	err = gi.DB.Preload("User").Where("group_id = ?", id).Find(&members).Error
+	if err != nil {
+		return nil, &model.Error{
+			Err:  fmt.Errorf("failed to fetch members: %w", err),
+			Code: http.StatusBadRequest,
+		}
+	}
+	return groupResponse(&group, members), nil
 }
 
 func (gi *GroupImpl) GetGroups(ownerID uint, page int) ([]schema.GroupResponse, *model.Error) {
 	var groups []model.Group
 	limit := gi.App.Config.Limit
 	offset := limit * page
-	if err := gi.DB.Preload("Members.Member").
-		Where("owner_id = ?", ownerID).
+	if err := gi.DB.
+		Where("created_by = ?", ownerID).
 		Offset(offset).
 		Limit(limit).
 		Find(&groups).
@@ -114,7 +125,7 @@ func (gi *GroupImpl) GetGroups(ownerID uint, page int) ([]schema.GroupResponse, 
 	}
 	groupResp := []schema.GroupResponse{}
 	for _, group := range groups {
-		groupResp = append(groupResp, *groupResponse(&group))
+		groupResp = append(groupResp, *groupResponse(&group, nil))
 	}
 	return groupResp, nil
 }
@@ -123,7 +134,7 @@ func (gi *GroupImpl) EditGroup(opts *schema.EditGroupInfoOpts) *model.Error {
 	group := model.Group{
 		ID: opts.ID,
 	}
-	update := make(map[string]interface{})
+	update := make(map[string]any)
 	if opts.Name != "" {
 		update[model.GroupName] = opts.Name
 	}
@@ -140,23 +151,30 @@ func (gi *GroupImpl) EditGroup(opts *schema.EditGroupInfoOpts) *model.Error {
 	return nil
 }
 
-func groupResponse(group *model.Group) *schema.GroupResponse {
+func (gi *GroupImpl) AddGroupMembers(opts *schema.AddGroupMembersOpts) *model.Error {
+	return nil
+}
+
+func (gi *GroupImpl) RemoveGroupMembers(opts *schema.RemoveGroupMemberOpts) *model.Error {
+	return nil
+}
+
+func groupResponse(group *model.Group, members []model.GroupMember) *schema.GroupResponse {
 	groupResp := schema.GroupResponse{
-		ID:            group.ID,
-		Name:          group.Name,
-		Type:          group.Type,
-		TotalExpense:  group.TotalExpense,
-		SettledAmount: group.SettledAmount,
+		ID:   group.ID,
+		Name: group.Name,
+		Type: group.Type,
 	}
-	members := []schema.MemberResponse{}
-	for _, resp := range group.Members {
-		member := resp.Member
-		members = append(members, schema.MemberResponse{
+	membersData := []schema.MemberResponse{}
+	// members := []schema.UserResponse{}
+	for _, resp := range members {
+		member := resp.User
+		membersData = append(membersData, schema.MemberResponse{
 			ID:       member.ID,
 			Username: *member.Username,
 		})
 	}
-	groupResp.Members = members
+	groupResp.Members = membersData
 	return &groupResp
 }
 

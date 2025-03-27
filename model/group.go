@@ -8,24 +8,21 @@ const (
 )
 
 type Group struct {
-	ID            uint    `gorm:"primaryKey;autoIncrement"`
-	Name          string  `gorm:"not null"`
-	OwnerID       uint    `gorm:"not null;index"`
-	Type          string  `gorm:"not null"`
-	TotalExpense  float64 `gorm:"check:total_expense>=0;default:0"`
-	SettledAmount float64 `gorm:"check:settled_amount >= 0;default:0;"`
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-
-	Owner   User          `gorm:"foreignKey:OwnerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-	Members []GroupMember `gorm:"foreignKey:GroupID"`
+	ID        uint      `gorm:"primaryKey;autoIncrement"`
+	Name      string    `gorm:"type:varchar(255);not null"`
+	Type      string    `gorm:"type:varchar(255);not null"`
+	CreatedBy uint      `gorm:"index;constraint:OnDelete:SET NULL;"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	User      *User     `gorm:"foreignKey:CreatedBy"`
 }
 
 type GroupMember struct {
-	GroupID  uint      `gorm:"not null;index"`
-	MemberID uint      `gorm:"not null;index"`
-	AddedAt  time.Time `gorm:"autoCreateTime"`
+	ID       uint      `gorm:"primaryKey;autoIncrement"`
+	GroupID  uint      `gorm:"not null;index;constraint:OnDelete:CASCADE;"`
+	UserID   uint      `gorm:"not null;index;constraint:OnDelete:CASCADE;"`
+	JoinedAt time.Time `gorm:"autoCreateTime"`
 
-	Group  Group `gorm:"foreignKey:GroupID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Member User  `gorm:"foreignKey:MemberID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	// Relationships
+	Group Group `gorm:"foreignKey:GroupID"`
+	User  User  `gorm:"foreignKey:UserID"`
 }

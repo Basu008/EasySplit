@@ -1,10 +1,10 @@
 package schema
 
 type CreateGroupOpts struct {
-	OwnerID   uint
-	Name      string `json:"name" validate:"required"`
-	Type      string `json:"type" validate:"required"`
-	MemberIDs []uint `json:"member_ids" validate:"required,min=1"`
+	OwnerID uint
+	Name    string `json:"name" validate:"required"`
+	Type    string `json:"type" validate:"required"`
+	UserIDs []uint `json:"user_ids" validate:"required,min=1"`
 }
 
 type EditGroupInfoOpts struct {
@@ -13,10 +13,14 @@ type EditGroupInfoOpts struct {
 	Type string `json:"type"`
 }
 
-type UpdateGroupMembers struct {
-	ID        uint
-	MemberID  uint   `json:"member_id"`
-	Operation string `json:"operation" validate:"oneof=add remove"`
+type RemoveGroupMemberOpts struct {
+	ID     uint
+	UserID uint `json:"user_id"`
+}
+
+type AddGroupMembersOpts struct {
+	ID      uint
+	UserIDs []uint `json:"user_ids"`
 }
 
 type GroupResponse struct {
@@ -25,7 +29,7 @@ type GroupResponse struct {
 	Type          string           `json:"type"`
 	TotalExpense  float64          `json:"total_expense"`
 	SettledAmount float64          `json:"settled_amount"`
-	Members       []MemberResponse `json:"members"`
+	Members       []MemberResponse `json:"members,omitempty"`
 }
 
 type MemberResponse struct {
