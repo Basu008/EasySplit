@@ -19,6 +19,8 @@ type Group interface {
 	GetGroups(ownerID uint, page int) ([]schema.GroupResponse, *model.Error)
 	//Edit
 	EditGroup(opts *schema.EditGroupInfoOpts) *model.Error
+	AddGroupMembers(opts *schema.AddGroupMembersOpts) *model.Error
+	RemoveGroupMember(opts *schema.RemoveGroupMemberOpts) *model.Error
 	MigrateGroup() error
 }
 
@@ -152,10 +154,29 @@ func (gi *GroupImpl) EditGroup(opts *schema.EditGroupInfoOpts) *model.Error {
 }
 
 func (gi *GroupImpl) AddGroupMembers(opts *schema.AddGroupMembersOpts) *model.Error {
+	members := []model.GroupMember{}
+	for _, userID := range opts.UserIDs {
+		members = append(members, model.GroupMember{
+			GroupID: opts.ID,
+			UserID:  userID,
+		})
+	}
+	if err := gi.DB.CreateInBatches(members, len(members)).Error; err != nil {
+		return &model.Error{
+			Err:  err,
+			Code: http.StatusBadRequest,
+		}
+	}
 	return nil
 }
 
-func (gi *GroupImpl) RemoveGroupMembers(opts *schema.RemoveGroupMemberOpts) *model.Error {
+func (gi *GroupImpl) RemoveGroupMember(opts *schema.RemoveGroupMemberOpts) *model.Error {
+	if err := gi.DB.Where("group_id = ? AND user_id = ?", opts.ID, opts.UserID).Delete(&model.GroupMember{}).Error; err != nil {
+		return &model.Error{
+			Err:  fmt.Errorf("failed to delete member: %w", err),
+			Code: http.StatusInternalServerError,
+		}
+	}
 	return nil
 }
 

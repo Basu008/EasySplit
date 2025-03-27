@@ -65,3 +65,37 @@ func (a *API) editGroup(requestCTX *handler.RequestContext, w http.ResponseWrite
 	}
 	requestCTX.SetAppResponse(true, http.StatusOK)
 }
+
+func (a *API) addGroupMembers(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
+	var s schema.AddGroupMembersOpts
+	if err := a.DecodeJSONBody(r, &s); err != nil {
+		requestCTX.SetErr(err, "", http.StatusBadRequest)
+		return
+	}
+	if errs := a.Validator.Validate(&s); errs != nil {
+		requestCTX.SetErrs(errs, http.StatusBadRequest)
+		return
+	}
+	if err := a.App.Group.AddGroupMembers(&s); err != nil {
+		requestCTX.SetErr(err.Err, err.Message, err.Code)
+		return
+	}
+	requestCTX.SetAppResponse(true, http.StatusOK)
+}
+
+func (a *API) removeGroupMember(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
+	var s schema.RemoveGroupMemberOpts
+	if err := a.DecodeJSONBody(r, &s); err != nil {
+		requestCTX.SetErr(err, "", http.StatusBadRequest)
+		return
+	}
+	if errs := a.Validator.Validate(&s); errs != nil {
+		requestCTX.SetErrs(errs, http.StatusBadRequest)
+		return
+	}
+	if err := a.App.Group.RemoveGroupMember(&s); err != nil {
+		requestCTX.SetErr(err.Err, err.Message, err.Code)
+		return
+	}
+	requestCTX.SetAppResponse(true, http.StatusOK)
+}

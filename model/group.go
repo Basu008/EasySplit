@@ -18,8 +18,8 @@ type Group struct {
 
 type GroupMember struct {
 	ID       uint      `gorm:"primaryKey;autoIncrement"`
-	GroupID  uint      `gorm:"not null;index;constraint:OnDelete:CASCADE;"`
-	UserID   uint      `gorm:"not null;index;constraint:OnDelete:CASCADE;"`
+	GroupID  uint      `gorm:"not null;index:idx_group_user;constraint:OnDelete:CASCADE;"`
+	UserID   uint      `gorm:"not null;index:idx_group_user;constraint:OnDelete:CASCADE;"`
 	JoinedAt time.Time `gorm:"autoCreateTime"`
 
 	// Relationships

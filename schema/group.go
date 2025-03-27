@@ -14,13 +14,13 @@ type EditGroupInfoOpts struct {
 }
 
 type RemoveGroupMemberOpts struct {
-	ID     uint
+	ID     uint `json:"id"`
 	UserID uint `json:"user_id"`
 }
 
 type AddGroupMembersOpts struct {
-	ID      uint
-	UserIDs []uint `json:"user_ids"`
+	ID      uint   `json:"id" validate:"required"`
+	UserIDs []uint `json:"user_ids" validate:"required,min=1"`
 }
 
 type GroupResponse struct {
