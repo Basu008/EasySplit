@@ -64,7 +64,12 @@ func (gi *GroupImpl) CreateGroup(opts *schema.CreateGroupOpts) *model.Error {
 			Code: http.StatusBadRequest,
 		}
 	}
-	members := []model.GroupMember{}
+	members := []model.GroupMember{
+		{
+			GroupID: group.ID,
+			UserID:  opts.OwnerID,
+		},
+	}
 	for _, userID := range opts.UserIDs {
 		members = append(members, model.GroupMember{
 			GroupID: group.ID,
