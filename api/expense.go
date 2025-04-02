@@ -55,6 +55,31 @@ func (a *API) createExpense(requestCTX *handler.RequestContext, w http.ResponseW
 	requestCTX.SetAppResponse(true, http.StatusCreated)
 }
 
+func (a *API) getExpense(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
+	expenseID := a.getIDfromPath(r, "expense_id")
+	expense, errResp := a.App.Expense.GetExpense(expenseID)
+	if errResp != nil {
+		requestCTX.SetErr(errResp.Err, errResp.Message, errResp.Code)
+		return
+	}
+	requestCTX.SetAppResponse(expense, http.StatusOK)
+}
+
+func (a *API) getExpenses(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
+	groupID := a.getIDfromPath(r, "group_id")
+	expenses, errResp := a.App.Expense.GetExpenses(groupID)
+	if errResp != nil {
+		requestCTX.SetErr(errResp.Err, errResp.Message, errResp.Code)
+		return
+	}
+	requestCTX.SetAppResponse(expenses, http.StatusOK)
+}
+
+func (a *API) deleteExpense(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
+	expenseID := a.getIDfromPath(r, "expense_id")
+	requestCTX.SetAppResponse(a.App.Expense.DeleteExpense(expenseID), http.StatusOK)
+}
+
 func validateMembers(group *schema.GroupResponse, s *schema.CreateExpense) bool {
 	for _, memeberOpt := range s.MemberIDWithShare {
 		var found bool

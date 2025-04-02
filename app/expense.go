@@ -12,6 +12,9 @@ import (
 
 type Expense interface {
 	CreateExpense(opt *schema.CreateExpense) *model.Error
+	GetExpenses(groupID uint) ([]model.Expense, *model.Error)
+	GetExpense(expenseID uint) (*model.ExpenseWithShares, *model.Error)
+	DeleteExpense(id uint) bool
 
 	MigrateExpense() error
 	MigrateExpenseShare() error
@@ -74,6 +77,73 @@ func (ei *ExpenseImpl) CreateExpense(opts *schema.CreateExpense) *model.Error {
 		}
 	}
 	return nil
+}
+
+func (ei *ExpenseImpl) GetExpenses(groupID uint) ([]model.Expense, *model.Error) {
+	var expenses []model.Expense
+	err := ei.DB.Find(&expenses).Where("group_id = ?", groupID).Error
+	if err != nil {
+		return nil, &model.Error{
+			Err:  err,
+			Code: http.StatusInternalServerError,
+		}
+	}
+	return expenses, nil
+}
+
+func (ei *ExpenseImpl) GetExpense(id uint) (*model.ExpenseWithShares, *model.Error) {
+	expense := model.Expense{
+		ID: id,
+	}
+	if err := ei.DB.First(&expense).Error; err != nil {
+		return nil, &model.Error{
+			Err:  err,
+			Code: http.StatusBadRequest,
+		}
+	}
+	var expenseShare []model.ExpenseShare
+	if err := ei.DB.Find(&expenseShare).Error; err != nil {
+		return nil, &model.Error{
+			Err:  err,
+			Code: http.StatusBadRequest,
+		}
+	}
+	resp := model.ExpenseWithShares{
+		ID:          expense.ID,
+		TotalAmount: expense.Amount,
+		Description: expense.Description,
+		CreatedBy:   expense.CreatedBy,
+	}
+	shares := []model.MembersShare{}
+	for _, es := range expenseShare {
+		ms := model.MembersShare{
+			ID:     es.UserID,
+			Amount: es.Amount,
+		}
+		shares = append(shares, ms)
+	}
+	resp.MembersShare = shares
+	return &resp, nil
+}
+
+func (ei *ExpenseImpl) DeleteExpense(id uint) bool {
+	tx := ei.DB.Begin()
+	expense := model.Expense{
+		ID: id,
+	}
+	var expenseShare []model.ExpenseShare
+	if err := tx.Where("expense_id = ?", id).Delete(&expenseShare).Error; err != nil {
+		tx.Rollback()
+		return false
+	}
+	if err := tx.Delete(&expense).Error; err != nil {
+		tx.Rollback()
+		return false
+	}
+	if err := tx.Commit().Error; err != nil {
+		return false
+	}
+	return true
 }
 
 func (ei *ExpenseImpl) MigrateExpense() error {
