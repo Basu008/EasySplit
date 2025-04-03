@@ -13,7 +13,7 @@ type Expense struct {
 	GroupID     uint      `gorm:"not null;index;constraint:OnDelete:CASCADE;"`
 	CreatedBy   uint      `json:"created_by" gorm:"index;constraint:OnDelete:SET NULL;"`
 	Amount      float64   `json:"amount" gorm:"type:decimal(10,2);not null"`
-	Description string    `json:"descript" gorm:"type:text"`
+	Description string    `json:"description" gorm:"type:text"`
 	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
 
 	// Relationships
@@ -26,6 +26,7 @@ type ExpenseShare struct {
 	ExpenseID uint    `json:"-" gorm:"not null;index:idx_expense_user;constraint:OnDelete:CASCADE;"`
 	UserID    uint    `json:"user_id" gorm:"not null;index:idx_expense_user;constraint:OnDelete:CASCADE;"`
 	Amount    float64 `json:"amount" gorm:"type:decimal(10,2);not null"`
+	IsSettled bool    `gorm:"default:false;not null"`
 
 	// Relationships
 	Expense Expense `json:"-" gorm:"foreignKey:ExpenseID"`

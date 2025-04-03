@@ -31,4 +31,7 @@ func (a *API) InitRoutes() {
 	a.Router.APIRoot.Handle("/expenses/{group_id}", a.requestWithAuthHandler(a.getExpenses)).Methods("GET")
 	a.Router.APIRoot.Handle("/expense/{expense_id}", a.requestWithAuthHandler(a.getExpense)).Methods("GET")
 	a.Router.APIRoot.Handle("/expense/{expense_id}", a.requestWithAuthHandler(a.deleteExpense)).Methods("DELETE")
+
+	//Payment
+	a.Router.APIRoot.Handle("/payment", a.requestWithAuthHandler(a.createPayment)).Methods("POST")
 }

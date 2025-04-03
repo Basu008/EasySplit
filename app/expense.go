@@ -16,6 +16,8 @@ type Expense interface {
 	GetExpense(expenseID uint) (*model.ExpenseWithShares, *model.Error)
 	DeleteExpense(id uint) bool
 
+	GetExpenseShare(expenseID, userID uint) (*model.ExpenseShare, *model.Error)
+
 	MigrateExpense() error
 	MigrateExpenseShare() error
 }
@@ -144,6 +146,21 @@ func (ei *ExpenseImpl) DeleteExpense(id uint) bool {
 		return false
 	}
 	return true
+}
+
+func (ei *ExpenseImpl) GetExpenseShare(expenseID, userID uint) (*model.ExpenseShare, *model.Error) {
+	var expenseShare model.ExpenseShare
+	whereQuery := model.ExpenseShare{
+		ExpenseID: expenseID,
+		UserID:    userID,
+	}
+	if err := ei.DB.Preload("Expense").Where(&whereQuery).First(&expenseShare).Error; err != nil {
+		return nil, &model.Error{
+			Err:  err,
+			Code: http.StatusBadRequest,
+		}
+	}
+	return &expenseShare, nil
 }
 
 func (ei *ExpenseImpl) MigrateExpense() error {
