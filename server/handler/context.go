@@ -27,7 +27,6 @@ func (requestCTX *RequestContext) SetErr(err error, errMsg string, statusCode in
 	requestCTX.Err = appErr
 }
 
-// SetAppResponse := setting app response in request context
 func (requestCTX *RequestContext) SetAppResponse(message interface{}, statusCode int) {
 	requestCTX.ResponseType = JSONResp
 	requestCTX.ResponseCode = statusCode

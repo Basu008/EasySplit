@@ -197,7 +197,8 @@ func groupResponse(group *model.Group, members []model.GroupMember) *schema.Grou
 		member := resp.User
 		membersData = append(membersData, schema.MemberResponse{
 			ID:       member.ID,
-			Username: *member.Username,
+			Username: member.Username,
+			FullName: member.FullName,
 		})
 	}
 	groupResp.Members = membersData

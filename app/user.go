@@ -1,7 +1,6 @@
 package app
 
 import (
-	"crypto/rand"
 	"errors"
 	"fmt"
 	"log"
@@ -10,13 +9,13 @@ import (
 	"github.com/Basu008/EasySplit.git/model"
 	"github.com/Basu008/EasySplit.git/schema"
 	"github.com/Basu008/EasySplit.git/server/auth"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type User interface {
-	//Login
-	LoginUser(opts *schema.PhoneNoLogin) *model.Error
-	ConfirmOTP(opts *schema.ConfirmOTPOpts) (*auth.UserClaim, *model.Error)
+	SignupUser(opts *schema.SignupOpts) (*model.User, *model.Error)
+	LoginUser(opts *schema.LoginOpts) (*auth.UserClaim, *model.Error)
 	//Get user
 	GetUserByID(id uint) (model.User, *model.Error)
 	GetUserByPhoneNo(phoneNumber string) (model.User, *model.Error)
@@ -49,40 +48,33 @@ func InitUser(opts *UserImplOpts) (User, error) {
 	return &ui, nil
 }
 
-func (ui *UserImpl) LoginUser(opts *schema.PhoneNoLogin) *model.Error {
-	// otp := ui.generateOTP()
+func (ui *UserImpl) SignupUser(opts *schema.SignupOpts) (*model.User, *model.Error) {
 	user := model.User{
-		PhoneNumber: opts.PhoneNumber,
+		FullName:    opts.FullName,
+		Username:    opts.Username,
 		CountryCode: opts.CountryCode,
+		PhoneNumber: opts.PhoneNumber,
+		Email:       opts.Email,
 	}
-	err := ui.DB.Create(&user).Error
+	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(opts.Password), 4)
 	if err != nil {
-		if err == gorm.ErrCheckConstraintViolated {
-			return model.NewError(err, "invalid phone_number", http.StatusBadRequest)
-		}
-		return model.NewError(err, "", http.StatusInternalServerError)
+		return nil, model.NewError(err, "", http.StatusBadRequest)
 	}
-	return nil
+	user.Password = string(encryptedPassword)
+	if err := ui.DB.Create(&user).Error; err != nil {
+		return nil, model.NewError(err, "", http.StatusInternalServerError)
+	}
+	return &user, nil
 }
 
-func (ui *UserImpl) ConfirmOTP(opts *schema.ConfirmOTPOpts) (*auth.UserClaim, *model.Error) {
-	user, customErr := ui.GetUserByPhoneNo(opts.PhoneNumber)
+func (ui *UserImpl) LoginUser(opts *schema.LoginOpts) (*auth.UserClaim, *model.Error) {
+	user, customErr := ui.GetUserByUsername(opts.Username)
 	if customErr != nil {
 		return nil, customErr
 	}
-	// if user.OTP != opts.OTP {
-	// 	newErr := model.NewError(nil, "invalid otp", http.StatusBadRequest)
-	// 	return nil, newErr
-	// }
-	updates := make(map[string]any)
-	updates[model.OTP] = "-"
-	if !user.PhoneVerified {
-		updates[model.PhoneVerified] = true
-	}
-	err := ui.DB.Model(&user).Updates(updates).Error
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(opts.Password))
 	if err != nil {
-		newErr := model.NewError(err, "", http.StatusInternalServerError)
-		return nil, newErr
+		return nil, model.NewError(err, "incorrect password", http.StatusBadRequest)
 	}
 	claim := auth.UserClaim{
 		ID:          user.ID,
@@ -159,19 +151,4 @@ func (ui *UserImpl) UpdateUser(opts *schema.UpdateUserOpts) *model.Error {
 func (ui *UserImpl) MigrateUser() error {
 	err := ui.DB.AutoMigrate(&model.User{})
 	return err
-}
-
-func (ui *UserImpl) generateOTP() string {
-	length := ui.App.Config.OTPLength
-	buffer := make([]byte, length)
-	_, err := rand.Read(buffer)
-	if err != nil {
-		return ""
-	}
-	otpChars := ui.App.Config.OTPChars
-	otpCharsLength := len(otpChars)
-	for i := 0; i < length; i++ {
-		buffer[i] = otpChars[int(buffer[i])%otpCharsLength]
-	}
-	return string(buffer)
 }

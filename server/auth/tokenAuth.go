@@ -7,11 +7,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// type TokenAuth interface {
-// 	SignToken() (string, error)
-// 	VerifyToken(string) (*UserClaim, error)
-// }
-
 type TokenAuthentication struct {
 	Config    *config.TokenAuthConfig
 	UserClaim *UserClaim

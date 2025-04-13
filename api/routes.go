@@ -6,8 +6,8 @@ func (a *API) InitRoutes() {
 	a.Router.Root.Handle("/health-check", a.requestHandler(a.healthCheck)).Methods("GET")
 
 	//User
+	a.Router.APIRoot.Handle("/user/signup", a.requestHandler(a.signupUser)).Methods("POST")
 	a.Router.APIRoot.Handle("/user/login", a.requestHandler(a.loginUser)).Methods("POST")
-	a.Router.APIRoot.Handle("/user/confirm-otp", a.requestHandler(a.confirmOTP)).Methods("POST")
 	a.Router.APIRoot.Handle("/user", a.requestWithAuthHandler(a.updateUser)).Methods("PATCH")
 	a.Router.APIRoot.Handle("/user", a.requestHandler(a.getUser)).Methods("GET")
 

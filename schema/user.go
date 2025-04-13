@@ -6,14 +6,18 @@ type GetUserOpts struct {
 	Username    string `json:"username"`
 }
 
-type PhoneNoLogin struct {
-	CountryCode string `json:"country_code"`
-	PhoneNumber string `json:"phone_number" validate:"len=10"`
+type SignupOpts struct {
+	FullName    string `json:"full_name" validate:"required,alpha_space"`
+	Username    string `json:"username" validate:"required,username"`
+	Password    string `json:"password" validate:"required,password"`
+	PhoneNumber string `json:"phone_number" validate:"required,len=10,numeric"`
+	CountryCode string `json:"country_code" validate:"required,eq=+91"`
+	Email       string `json:"email" validate:"required,email"`
 }
 
-type ConfirmOTPOpts struct {
-	PhoneNumber string `json:"phone_number" validate:"len=10"`
-	OTP         string `json:"otp" validate:"len=4"`
+type LoginOpts struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type UpdateUserOpts struct {

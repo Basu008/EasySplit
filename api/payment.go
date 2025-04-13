@@ -17,8 +17,7 @@ func (a *API) createPayment(requestCTX *handler.RequestContext, w http.ResponseW
 		requestCTX.SetErrs(errs, http.StatusBadRequest)
 		return
 	}
-	// s.PayerID = a.TokenAuth.UserClaim.ID
-	s.PayerID = 4
+	s.PayerID = a.TokenAuth.UserClaim.ID
 	expenseShare, err := a.App.Expense.GetExpenseShare(s.ExpenseID, s.PayerID)
 	if err != nil {
 		requestCTX.SetErr(nil, "expense doesn't exists", http.StatusBadRequest)

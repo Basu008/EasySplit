@@ -35,4 +35,5 @@ type GroupResponse struct {
 type MemberResponse struct {
 	ID       uint   `json:"id"`
 	Username string `json:"username"`
+	FullName string `json:"full_name"`
 }

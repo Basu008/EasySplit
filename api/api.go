@@ -28,7 +28,6 @@ type Options struct {
 	Validator  *validator.Validator
 }
 
-// Router stores all the endpoints available for the server to respond.
 type Router struct {
 	Root    *mux.Router
 	APIRoot *mux.Router
