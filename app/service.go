@@ -1,8 +1,12 @@
 package app
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 func InitService(a *App) {
+	fmt.Println("Setting up Services...")
 	var err error
 	a.User, err = InitUser(&UserImplOpts{
 		App: a,

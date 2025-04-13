@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Basu008/EasySplit.git/app"
@@ -34,6 +35,7 @@ type Router struct {
 }
 
 func NewAPI(opts *Options) *API {
+	fmt.Println("Setting up APIs...")
 	api := API{
 		MainRouter: opts.MainRouter,
 		Router:     &Router{},

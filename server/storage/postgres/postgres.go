@@ -15,7 +15,9 @@ type PostgresStorage struct {
 }
 
 func NewPostgresStorage(c *config.DatabaseConfig) *PostgresStorage {
+	fmt.Println("Conecting to Postgres.... ")
 	dsn := c.ConnectionURL()
+	fmt.Printf("connection url = %s", dsn)
 	var db *gorm.DB
 	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -23,7 +25,7 @@ func NewPostgresStorage(c *config.DatabaseConfig) *PostgresStorage {
 		log.Fatalf("failed to establish connection with postgres: %s", err.Error())
 		return nil
 	}
-	fmt.Print("Connected to Postgres\n")
+	fmt.Println("Connected to Postgres")
 	return &PostgresStorage{Config: c, DB: db}
 }
 
@@ -35,6 +37,5 @@ func (p *PostgresStorage) Close() {
 			return
 		}
 		db.Close()
-		fmt.Println("Database connection closed.")
 	}
 }
