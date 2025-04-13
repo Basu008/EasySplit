@@ -11,7 +11,6 @@ import (
 	"github.com/Basu008/EasySplit.git/schema"
 	"github.com/Basu008/EasySplit.git/server/auth"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type User interface {
@@ -51,23 +50,12 @@ func InitUser(opts *UserImplOpts) (User, error) {
 }
 
 func (ui *UserImpl) LoginUser(opts *schema.PhoneNoLogin) *model.Error {
-	otp := ui.generateOTP()
+	// otp := ui.generateOTP()
 	user := model.User{
 		PhoneNumber: opts.PhoneNumber,
 		CountryCode: opts.CountryCode,
-		OTP:         otp,
 	}
-	update := map[string]any{
-		model.OTP: otp,
-	}
-	err := ui.DB.Clauses(clause.OnConflict{
-		Columns: []clause.Column{
-			{
-				Name: model.PhoneNumber,
-			},
-		},
-		DoUpdates: clause.Assignments(update),
-	}).Create(&user).Error
+	err := ui.DB.Create(&user).Error
 	if err != nil {
 		if err == gorm.ErrCheckConstraintViolated {
 			return model.NewError(err, "invalid phone_number", http.StatusBadRequest)
@@ -82,10 +70,10 @@ func (ui *UserImpl) ConfirmOTP(opts *schema.ConfirmOTPOpts) (*auth.UserClaim, *m
 	if customErr != nil {
 		return nil, customErr
 	}
-	if user.OTP != opts.OTP {
-		newErr := model.NewError(nil, "invalid otp", http.StatusBadRequest)
-		return nil, newErr
-	}
+	// if user.OTP != opts.OTP {
+	// 	newErr := model.NewError(nil, "invalid otp", http.StatusBadRequest)
+	// 	return nil, newErr
+	// }
 	updates := make(map[string]any)
 	updates[model.OTP] = "-"
 	if !user.PhoneVerified {
