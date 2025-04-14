@@ -6,7 +6,7 @@ import (
 )
 
 func InitService(a *App) {
-	fmt.Println("Setting up Services...")
+	fmt.Println("\nSetting up Services...")
 	var err error
 	a.User, err = InitUser(&UserImplOpts{
 		App: a,

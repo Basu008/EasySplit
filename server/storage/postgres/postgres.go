@@ -15,7 +15,7 @@ type PostgresStorage struct {
 }
 
 func NewPostgresStorage(c *config.DatabaseConfig) *PostgresStorage {
-	fmt.Println("Conecting to Postgres.... ")
+	fmt.Println("\nConecting to Postgres.... ")
 	dsn := c.ConnectionURL()
 	fmt.Printf("connection url = %s", dsn)
 	var db *gorm.DB

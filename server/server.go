@@ -50,7 +50,7 @@ func NewServer() *Server {
 }
 
 func (s *Server) StartServer() {
-	fmt.Println("Setting up Server....")
+	fmt.Println("\nSetting up Server....")
 	n := negroni.New()
 	recovery := negroni.NewRecovery()
 	n.Use(recovery)
@@ -61,7 +61,7 @@ func (s *Server) StartServer() {
 		ReadTimeout:  s.Config.ServerConfig.ReadTimeout * time.Second,
 		WriteTimeout: s.Config.ServerConfig.WriteTimeout * time.Second,
 	}
-	fmt.Printf("Server Started listening at %s:%s", s.Config.ServerConfig.ListenAddr, s.Config.ServerConfig.Port)
+	fmt.Printf("\nServer Started listening at %s:%s", s.Config.ServerConfig.ListenAddr, s.Config.ServerConfig.Port)
 	go func() {
 		err := s.httpServer.ListenAndServe()
 		if err != nil {
@@ -72,7 +72,7 @@ func (s *Server) StartServer() {
 }
 
 func (s *Server) StopServer() {
-	fmt.Println("Closing Postgres...")
+	fmt.Println("\nClosing Postgres...")
 	s.Postgres.Close()
-	fmt.Println("Closed Postgres")
+	fmt.Println("\nClosed Postgres")
 }

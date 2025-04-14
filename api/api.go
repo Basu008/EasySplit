@@ -35,7 +35,7 @@ type Router struct {
 }
 
 func NewAPI(opts *Options) *API {
-	fmt.Println("Setting up APIs...")
+	fmt.Println("\nSetting up APIs...")
 	api := API{
 		MainRouter: opts.MainRouter,
 		Router:     &Router{},
