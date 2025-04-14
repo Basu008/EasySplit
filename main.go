@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Started EasySplit systems....")
+	fmt.Println("Starting EasySplit systems....")
 	s := server.NewServer()
 	s.StartServer()
 
