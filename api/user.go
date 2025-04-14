@@ -50,7 +50,7 @@ func (a *API) loginUser(requestCTX *handler.RequestContext, w http.ResponseWrite
 
 func (a *API) getUser(requestCTX *handler.RequestContext, w http.ResponseWriter, r *http.Request) {
 	userService := a.App.User
-	id := a.getIDfromPath(r, "id")
+	id := a.getIDfromQuery(r, "id")
 	if id != 0 {
 		user, err := userService.GetUserByID(uint(id))
 		if err != nil {

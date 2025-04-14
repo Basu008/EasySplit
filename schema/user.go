@@ -21,7 +21,9 @@ type LoginOpts struct {
 }
 
 type UpdateUserOpts struct {
-	ID       uint   `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+	ID          uint   `json:"id"`
+	FullName    string `json:"full_name" validate:"omitempty,alpha_space"`
+	Username    string `json:"username" validate:"omitempty,username"`
+	Email       string `json:"email" validate:"omitempty,email"`
+	PhoneNumber string `json:"phone_number" validate:"omitempty,len=10,numeric"`
 }

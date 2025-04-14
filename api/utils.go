@@ -57,3 +57,17 @@ func (a *API) getIDfromPath(r *http.Request, key string) uint {
 	}
 	return uint(id)
 }
+
+func (a *API) getIDfromQuery(r *http.Request, key string) uint {
+	idString := r.URL.Query().Get(key)
+	var id uint64
+	if idString != "" {
+		var err error
+		id, err = strconv.ParseUint(idString, 10, 32)
+		if err != nil {
+			return 0
+		}
+		return uint(id)
+	}
+	return uint(id)
+}
