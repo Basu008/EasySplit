@@ -36,7 +36,7 @@ type ExpenseShare struct {
 type ExpenseWithShares struct {
 	ID           uint           `json:"id"`
 	TotalAmount  float64        `json:"total_amount"`
-	Description  string         `json:"descript"`
+	Description  string         `json:"description"`
 	CreatedBy    uint           `json:"created_by"`
 	MembersShare []MembersShare `json:"members_share"`
 }
