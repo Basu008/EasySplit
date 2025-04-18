@@ -39,4 +39,5 @@ A backend service that helps users easily track, manage, and split expenses with
 4. **Running Code:**
     go run main.go
 
-
+5. **Sanity Check**
+    Hit GET {{baseURL}}/health-check. If everything is working fine, you should get `true` in payload
