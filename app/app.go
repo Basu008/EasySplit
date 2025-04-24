@@ -1,8 +1,6 @@
 package app
 
 import (
-	"net/http"
-
 	"github.com/Basu008/EasySplit.git/server/config"
 	postgresStorage "github.com/Basu008/EasySplit.git/server/storage/postgres"
 )
@@ -13,9 +11,8 @@ type Options struct {
 }
 
 type App struct {
-	Postgres   *postgresStorage.PostgresStorage
-	Config     *config.APPConfig
-	HttpClient http.Client
+	Postgres *postgresStorage.PostgresStorage
+	Config   *config.APPConfig
 
 	//Sevices
 	User    User
