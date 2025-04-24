@@ -49,8 +49,7 @@ type APPConfig struct {
 	Limit int `mapstructure:"limit"`
 }
 
-func GetConfig() *Config {
-	fileName := "default"
+func GetConfigFromFile(fileName string) *Config {
 	viper.SetConfigName(fileName)
 	viper.SetConfigType("toml")
 	viper.AddConfigPath("../conf/")
@@ -59,12 +58,12 @@ func GetConfig() *Config {
 	viper.AddConfigPath("./conf/")
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("couldn't load config: %s", err)
+		log.Fatalf("couldn't load %s config: %s", fileName, err)
 		os.Exit(1)
 	}
 	config := &Config{}
 	if err := viper.Unmarshal(&config); err != nil {
-		fmt.Printf("couldn't read config: %s", err)
+		fmt.Printf("couldn't read %s config: %s", fileName, err)
 		os.Exit(1)
 	}
 	return config

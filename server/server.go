@@ -26,7 +26,7 @@ type Server struct {
 }
 
 func NewServer() *Server {
-	c := config.GetConfig()
+	c := config.GetConfigFromFile("default")
 	ps := postgresStorage.NewPostgresStorage(&c.DatabaseConfig)
 	r := mux.NewRouter()
 	server := &Server{
