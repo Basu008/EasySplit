@@ -24,11 +24,11 @@ func setupTestUser(t *testing.T) (*App, User) {
 func createTestUser(t *testing.T, testApp *App) *model.User {
 	opts := schema.SignupOpts{
 		FullName:    "Jane Doe",
-		Username:    "janedoe123",
+		Username:    RandString(10),
 		Password:    "StrongPassword123!",
-		PhoneNumber: "9876543210",
+		PhoneNumber: RandPhoneNumber(),
 		CountryCode: "+91",
-		Email:       "janedoe@example.com",
+		Email:       RandEmail(),
 	}
 	user, err := testApp.User.SignupUser(&opts)
 	assert.Nil(t, err)
@@ -130,8 +130,8 @@ func TestUpdateUser_OK(t *testing.T) {
 
 func TestLoginUser_WrongPassword(t *testing.T) {
 	testApp, userService := setupTestUser(t)
+	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	user := createTestUser(t, testApp)
-
 	loginOpts := schema.LoginOpts{
 		Username: user.Username,
 		Password: "WrongPassword!",
@@ -145,8 +145,8 @@ func TestLoginUser_WrongPassword(t *testing.T) {
 }
 
 func TestGetUserByID_NotFound(t *testing.T) {
-	_, userService := setupTestUser(t)
-
+	testApp, userService := setupTestUser(t)
+	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	foundUser, err := userService.GetUserByID(99999) // random non-existent ID
 
 	assert.NotNil(t, err)
@@ -156,8 +156,8 @@ func TestGetUserByID_NotFound(t *testing.T) {
 }
 
 func TestGetUserByPhoneNo_NotFound(t *testing.T) {
-	_, userService := setupTestUser(t)
-
+	testApp, userService := setupTestUser(t)
+	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	foundUser, err := userService.GetUserByPhoneNo("0000000000") // invalid phone
 
 	assert.NotNil(t, err)
@@ -167,8 +167,8 @@ func TestGetUserByPhoneNo_NotFound(t *testing.T) {
 }
 
 func TestGetUserByUsername_NotFound(t *testing.T) {
-	_, userService := setupTestUser(t)
-
+	testApp, userService := setupTestUser(t)
+	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	foundUser, err := userService.GetUserByUsername("nonexistentusername") // invalid username
 
 	assert.NotNil(t, err)
@@ -178,8 +178,8 @@ func TestGetUserByUsername_NotFound(t *testing.T) {
 }
 
 func TestUpdateUser_UserNotFound(t *testing.T) {
-	_, userService := setupTestUser(t)
-
+	testApp, userService := setupTestUser(t)
+	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	updateOpts := schema.UpdateUserOpts{
 		ID:       99999, // non-existent ID
 		Username: "shouldnotexist",
