@@ -33,7 +33,7 @@ func cleanUpDB(db *gorm.DB) error {
 		"groups",
 		"expenses",
 		"users",
-		// "payments",
+		"payments",
 	}
 
 	for _, table := range tables {
