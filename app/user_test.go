@@ -11,6 +11,7 @@ import (
 
 func setupTestUser(t *testing.T) (*App, User) {
 	testApp := NewTestApp(getTestConfig())
+	t.Cleanup(func() { cleanUpDB(testApp.Postgres.DB) })
 	userService, serviceErr := InitUser(&UserImplOpts{
 		App: testApp,
 		DB:  testApp.Postgres.DB,
@@ -37,8 +38,7 @@ func createTestUser(t *testing.T, testApp *App) *model.User {
 }
 
 func TestSignUpUser_OK(t *testing.T) {
-	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
+	_, userService := setupTestUser(t)
 	opts := schema.SignupOpts{
 		FullName:    "John Doe",
 		Username:    "johndoe123",
@@ -56,7 +56,6 @@ func TestSignUpUser_OK(t *testing.T) {
 
 func TestLoginUser_OK(t *testing.T) {
 	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	user := createTestUser(t, testApp)
 
 	loginOpts := schema.LoginOpts{
@@ -73,7 +72,6 @@ func TestLoginUser_OK(t *testing.T) {
 
 func TestGetUserByID_OK(t *testing.T) {
 	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	user := createTestUser(t, testApp)
 
 	foundUser, err := userService.GetUserByID(user.ID)
@@ -85,7 +83,6 @@ func TestGetUserByID_OK(t *testing.T) {
 
 func TestGetUserByPhoneNo_OK(t *testing.T) {
 	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	user := createTestUser(t, testApp)
 
 	foundUser, err := userService.GetUserByPhoneNo(user.PhoneNumber)
@@ -97,7 +94,6 @@ func TestGetUserByPhoneNo_OK(t *testing.T) {
 
 func TestGetUserByUsername_OK(t *testing.T) {
 	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	user := createTestUser(t, testApp)
 
 	foundUser, err := userService.GetUserByUsername(user.Username)
@@ -109,7 +105,6 @@ func TestGetUserByUsername_OK(t *testing.T) {
 
 func TestUpdateUser_OK(t *testing.T) {
 	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	user := createTestUser(t, testApp)
 
 	updateOpts := schema.UpdateUserOpts{
@@ -130,7 +125,6 @@ func TestUpdateUser_OK(t *testing.T) {
 
 func TestLoginUser_WrongPassword(t *testing.T) {
 	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
 	user := createTestUser(t, testApp)
 	loginOpts := schema.LoginOpts{
 		Username: user.Username,
@@ -145,8 +139,7 @@ func TestLoginUser_WrongPassword(t *testing.T) {
 }
 
 func TestGetUserByID_NotFound(t *testing.T) {
-	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
+	_, userService := setupTestUser(t)
 	foundUser, err := userService.GetUserByID(99999) // random non-existent ID
 
 	assert.NotNil(t, err)
@@ -156,8 +149,7 @@ func TestGetUserByID_NotFound(t *testing.T) {
 }
 
 func TestGetUserByPhoneNo_NotFound(t *testing.T) {
-	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
+	_, userService := setupTestUser(t)
 	foundUser, err := userService.GetUserByPhoneNo("0000000000") // invalid phone
 
 	assert.NotNil(t, err)
@@ -167,8 +159,7 @@ func TestGetUserByPhoneNo_NotFound(t *testing.T) {
 }
 
 func TestGetUserByUsername_NotFound(t *testing.T) {
-	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
+	_, userService := setupTestUser(t)
 	foundUser, err := userService.GetUserByUsername("nonexistentusername") // invalid username
 
 	assert.NotNil(t, err)
@@ -178,8 +169,7 @@ func TestGetUserByUsername_NotFound(t *testing.T) {
 }
 
 func TestUpdateUser_UserNotFound(t *testing.T) {
-	testApp, userService := setupTestUser(t)
-	defer cleanUpDB(testApp.Postgres.DB, &model.User{})
+	_, userService := setupTestUser(t)
 	updateOpts := schema.UpdateUserOpts{
 		ID:       99999, // non-existent ID
 		Username: "shouldnotexist",

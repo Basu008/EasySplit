@@ -8,12 +8,11 @@ import (
 	"github.com/Basu008/EasySplit.git/model"
 	"github.com/Basu008/EasySplit.git/schema"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func setupTestGroup(t *testing.T) (*App, Group) {
 	testApp := NewTestApp(getTestConfig())
-
+	t.Cleanup(func() { cleanUpDB(testApp.Postgres.DB) })
 	groupService, serviceErr := InitGroup(&GroupImplOpts{
 		App: testApp,
 		DB:  testApp.Postgres.DB,
@@ -63,15 +62,8 @@ func createGroup(t *testing.T, testApp *App) (*schema.GroupResponse, uint) {
 	return &groups[0], owner.ID
 }
 
-func cleanUpGroupTestDBs(db *gorm.DB) {
-	cleanUpDB(db, &model.Group{})
-	cleanUpDB(db, &model.User{})
-	cleanUpDB(db, &model.GroupMember{})
-}
-
 func TestCreateGroup_OK(t *testing.T) {
 	testApp, groupService := setupTestGroup(t)
-	defer cleanUpGroupTestDBs(testApp.Postgres.DB)
 	owner := createGroupUser(t, testApp)
 	var memberIDs []uint
 	for range 2 {
@@ -91,7 +83,6 @@ func TestCreateGroup_OK(t *testing.T) {
 
 func TestGetGroupByID_OK(t *testing.T) {
 	testApp, groupService := setupTestGroup(t)
-	defer cleanUpGroupTestDBs(testApp.Postgres.DB)
 	group, _ := createGroup(t, testApp)
 
 	foundGroup, err := groupService.GetGroupByID(group.ID)
@@ -103,8 +94,7 @@ func TestGetGroupByID_OK(t *testing.T) {
 }
 
 func TestGetGroupByID_NotFound(t *testing.T) {
-	testApp, groupService := setupTestGroup(t)
-	defer cleanUpGroupTestDBs(testApp.Postgres.DB)
+	_, groupService := setupTestGroup(t)
 	foundGroup, err := groupService.GetGroupByID(9999)
 
 	assert.Nil(t, foundGroup)
@@ -115,7 +105,6 @@ func TestGetGroupByID_NotFound(t *testing.T) {
 
 func TestGetGroups_OK(t *testing.T) {
 	testApp, groupService := setupTestGroup(t)
-	defer cleanUpGroupTestDBs(testApp.Postgres.DB)
 	_, ownerID := createGroup(t, testApp)
 
 	groups, err := groupService.GetGroups(ownerID, 0)
@@ -127,7 +116,6 @@ func TestGetGroups_OK(t *testing.T) {
 
 func TestEditGroup_OK(t *testing.T) {
 	testApp, groupService := setupTestGroup(t)
-	defer cleanUpGroupTestDBs(testApp.Postgres.DB)
 	group, _ := createGroup(t, testApp)
 
 	editOpts := &schema.EditGroupInfoOpts{
@@ -147,7 +135,6 @@ func TestEditGroup_OK(t *testing.T) {
 
 func TestAddGroupMembers_OK(t *testing.T) {
 	testApp, groupService := setupTestGroup(t)
-	defer cleanUpGroupTestDBs(testApp.Postgres.DB)
 	group, _ := createGroup(t, testApp)
 	member1 := createGroupUser(t, testApp)
 	member2 := createGroupUser(t, testApp)
@@ -162,7 +149,6 @@ func TestAddGroupMembers_OK(t *testing.T) {
 
 func TestRemoveGroupMember_OK(t *testing.T) {
 	testApp, groupService := setupTestGroup(t)
-	defer cleanUpGroupTestDBs(testApp.Postgres.DB)
 	group, _ := createGroup(t, testApp)
 	member := createGroupUser(t, testApp)
 	addMembersOpts := &schema.AddGroupMembersOpts{
@@ -182,7 +168,6 @@ func TestRemoveGroupMember_OK(t *testing.T) {
 
 func TestRemoveGroupMember_NotFound(t *testing.T) {
 	testApp, groupService := setupTestGroup(t)
-	defer cleanUpGroupTestDBs(testApp.Postgres.DB)
 	group, _ := createGroup(t, testApp)
 
 	removeOpts := &schema.RemoveGroupMemberOpts{

@@ -6,15 +6,11 @@ import (
 	"github.com/Basu008/EasySplit.git/model"
 	"github.com/Basu008/EasySplit.git/schema"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func setupTestFriend(t *testing.T) (*App, Friend) {
 	testApp := NewTestApp(getTestConfig())
-	t.Cleanup(func() {
-		cleanUpDB(testApp.Postgres.DB, &model.Friend{})
-	})
-
+	t.Cleanup(func() { cleanUpDB(testApp.Postgres.DB) })
 	friendService, serviceErr := InitFriend(&FriendImplOpts{
 		App: testApp,
 		DB:  testApp.Postgres.DB,
@@ -69,14 +65,8 @@ func createTestUsers(t *testing.T, testApp *App) []uint {
 	return ids
 }
 
-func cleanUpFriendAndUserDB(db *gorm.DB) {
-	cleanUpDB(db, &model.Friend{})
-	cleanUpDB(db, &model.User{})
-}
-
 func TestSendFriendRequest_OK(t *testing.T) {
 	testApp, friendService := setupTestFriend(t)
-	defer cleanUpFriendAndUserDB(testApp.Postgres.DB)
 	ids := createTestUsers(t, testApp)
 	senderID, userID := ids[0], ids[1]
 	opts := &schema.FriendRequestOpts{
@@ -90,7 +80,6 @@ func TestSendFriendRequest_OK(t *testing.T) {
 
 func TestSendFriendRequest_AlreadyExists(t *testing.T) {
 	testApp, friendService := setupTestFriend(t)
-	defer cleanUpFriendAndUserDB(testApp.Postgres.DB)
 	ids := createTestUsers(t, testApp)
 	senderID, receiverID := ids[0], ids[1]
 	createFriendRequest(t, friendService, senderID, receiverID)
@@ -106,7 +95,6 @@ func TestSendFriendRequest_AlreadyExists(t *testing.T) {
 
 func TestUpdateFriendRequest_Accept_OK(t *testing.T) {
 	testApp, friendService := setupTestFriend(t)
-	defer cleanUpFriendAndUserDB(testApp.Postgres.DB)
 	ids := createTestUsers(t, testApp)
 	senderID, receiverID := ids[0], ids[1]
 	createFriendRequest(t, friendService, senderID, receiverID)
@@ -123,7 +111,6 @@ func TestUpdateFriendRequest_Accept_OK(t *testing.T) {
 
 func TestUpdateFriendRequest_Reject_OK(t *testing.T) {
 	testApp, friendService := setupTestFriend(t)
-	defer cleanUpFriendAndUserDB(testApp.Postgres.DB)
 	ids := createTestUsers(t, testApp)
 	senderID, receiverID := ids[0], ids[1]
 	createFriendRequest(t, friendService, senderID, receiverID)
@@ -140,7 +127,6 @@ func TestUpdateFriendRequest_Reject_OK(t *testing.T) {
 
 func TestGetAllFriends_OK(t *testing.T) {
 	testApp, friendService := setupTestFriend(t)
-	defer cleanUpFriendAndUserDB(testApp.Postgres.DB)
 	ids := createTestUsers(t, testApp)
 	senderID, receiverID := ids[0], ids[1]
 	createFriendRequest(t, friendService, senderID, receiverID)
@@ -159,7 +145,6 @@ func TestGetAllFriends_OK(t *testing.T) {
 
 func TestGetFriendStatus_OK(t *testing.T) {
 	testApp, friendService := setupTestFriend(t)
-	defer cleanUpFriendAndUserDB(testApp.Postgres.DB)
 	ids := createTestUsers(t, testApp)
 	senderID, receiverID := ids[0], ids[1]
 	createFriendRequest(t, friendService, senderID, receiverID)
@@ -174,7 +159,6 @@ func TestGetFriendStatus_OK(t *testing.T) {
 
 func TestGetFriendStatus_NotFound(t *testing.T) {
 	testApp, friendService := setupTestFriend(t)
-	defer cleanUpFriendAndUserDB(testApp.Postgres.DB)
 	ids := createTestUsers(t, testApp)
 	senderID, receiverID := ids[0], ids[1]
 	friend, err := friendService.GetFriendStatus(senderID, receiverID)
