@@ -31,7 +31,7 @@ func cleanUpDB(db *gorm.DB) error {
 		"friends",
 		"group_members",
 		"groups",
-		// "expenses",
+		"expenses",
 		"users",
 		// "payments",
 	}
